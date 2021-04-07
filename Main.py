@@ -5,7 +5,7 @@ import Food
 import neat
 
 WORLDSIZE = 1000
-FPS = 240
+FPS = 1000
 
 SPAWNBORDER = 50
 
@@ -60,16 +60,19 @@ def runPlanet(genomes, config):
             output = nets[i].activate(herbivore.getData())
             decision = output.index(max(output)) + 1
             foodList = herbivore.update(foodList, decision)
-            genomes[i][1].fitness = herbivore.foodEaten
+            genomes[i][1].fitness = herbivore.fitness
+            
             if (herbivore.alive):
                 aliveCreatues += 1
-        
+
+
         if (aliveCreatues == 0):
             running = False
 
         #chance more food is generated. if more creatures, greater chance for food to be generated
-        #if ((random.randint(0,100) < (30 - round(len(herbivores)/4))) and (len(foodList) < 500)):
-        #    foodList = replenishFood(foodList)
+        #(random.randint(0,100) < (30 - round(len(herbivores)/4))) and (len(foodList) < 500)
+        if (random.randint(0,100) < 1):
+            foodList = replenishFood(foodList)
 
         allSprites.add(herbivores, foodList)
         #Draw

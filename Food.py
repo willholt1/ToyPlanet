@@ -8,7 +8,7 @@ class Food(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
-        self.energy = 50
+        self.energy = 100
 
     def getPosition(self):
        print('x = {} & y = {}'.format(self.center_x, self.center_y))

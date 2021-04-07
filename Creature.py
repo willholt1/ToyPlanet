@@ -14,7 +14,6 @@ WORLDSIZE = 1000
 MOVE = 1
 TURNLEFT = 2
 TURNRIGHT = 3
-LOOK = 4
 
 class Creature(pygame.sprite.Sprite):
     def __init__(self, image, x, y):
@@ -25,14 +24,18 @@ class Creature(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         
         self.direction = UP
-        self.energy = 1000
+        self.energy = 300
         self.speed = 1
-        self.viewDistance = 100
+        self.viewDistance = 200
         self.alive = True
+        self.fitness = 0
 
         #creature memory
         self.nearestFoodX = WORLDSIZE/2
         self.nearestFoodY = WORLDSIZE/2
+        self.nearestFoodDistance = 0
+        self.lastDirection = self.direction
+        self.lastDirectionCount = 0
 
         #performance stats
         self.distanceTravelled = 0
@@ -41,16 +44,10 @@ class Creature(pygame.sprite.Sprite):
         self.children = 0
 
     def getData(self):
-        return[self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY, self.direction]
-
-    def mutate(self):
-        pass
-
-    def createValues(self):
-        pass
+        return[self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY, self.nearestFoodDistance]
     
     def update(self, foodList, action):
-        
+        self.lastDistanceTravelled = self.distanceTravelled
         if (self.energy > 0):
             if (action == MOVE):
                 self.move()
@@ -58,18 +55,22 @@ class Creature(pygame.sprite.Sprite):
                 self.turnLeft()
             elif (action == TURNRIGHT):
                 self.turnRight()
-            elif (action == LOOK):
-                self.look(foodList)
+
+            self.lastDirectionCheck()
+            self.look(foodList)
+            foodList = self.checkEat(foodList)
             self.energy -= 1
         else:
             self.alive = False
-
-        foodList = self.checkEat(foodList)
+            if (self.distanceTravelled < 10):
+                self.fitness -= 10
+            else:
+                self.fitness += self.foodEaten
 
         return foodList
 
     def move(self):
-
+        
         if (self.direction == UP and self.rect.centery > 5):
             self.rect.centery -= self.speed
             self.distanceTravelled += 1
@@ -82,6 +83,7 @@ class Creature(pygame.sprite.Sprite):
         elif (self.direction == RIGHT and self.rect.centerx < (WORLDSIZE - 5)):
             self.rect.centerx += self.speed
             self.distanceTravelled += 1
+
 
     def turnLeft(self):
         if (self.direction == UP):
@@ -114,6 +116,17 @@ class Creature(pygame.sprite.Sprite):
         x, y = self.rect.center
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+    
+    def lastDirectionCheck(self):
+        if (self.direction == self.lastDirection):
+            self.lastDirectionCount += 1
+        else:
+            self.lastDirectionCount = 0
+
+        self.lastDirection = self.direction
+
+        if (self.lastDirectionCount >= self.viewDistance):
+            self.fitness -= 2
 
     def checkEat(self, foodList):
         for food in foodList:
@@ -132,15 +145,31 @@ class Creature(pygame.sprite.Sprite):
     #sets the coordinates of the closest piece of food within view
     def look(self, foodList):
         shortestDistance = WORLDSIZE
+        distance = WORLDSIZE
         for food in foodList:
-            distance = self.getDistance(self.rect.centerx, self.rect.centery, food.rect.centerx, food.rect.centery)
+            #calculate distance if food is in front
+            if ((self.direction == UP) and (food.rect.centery < self.rect.centery) or 
+                ((self.direction == DOWN) and (food.rect.centery > self.rect.centery)) or 
+                ((self.direction == LEFT) and (food.rect.centerx < self.rect.centerx)) or 
+                ((self.direction == RIGHT) and (food.rect.centerx > self.rect.centerx))):
+                distance = self.getDistance(self.rect.centerx, self.rect.centery, food.rect.centerx, food.rect.centery)
+
+            
             if ((distance < self.viewDistance) and (distance < shortestDistance)):
-                shortestDistance = distance        
+                shortestDistance = distance
+                self.nearestFoodDistance = distance    
                 self.nearestFoodX = food.rect.centerx
                 self.nearestFoodY = food.rect.centery
+                
+                if (shortestDistance < self.nearestFoodDistance):
+                    self.fitness += 0.01
+                else:
+                    self.fitness -= 0.01
+
             elif (shortestDistance == WORLDSIZE):
                 self.nearestFoodX = WORLDSIZE/2
                 self.nearestFoodY = WORLDSIZE/2
+                self.nearestFoodDistance = 500
         #print('({}, {})'.format(self.nearestFoodX, self.nearestFoodY))
 
     def getInfo(self):
