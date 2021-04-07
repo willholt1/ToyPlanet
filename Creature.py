@@ -28,6 +28,7 @@ class Creature(pygame.sprite.Sprite):
         self.energy = 1000
         self.speed = 1
         self.viewDistance = 100
+        self.alive = True
 
         #creature memory
         self.nearestFoodX = WORLDSIZE/2
@@ -39,6 +40,9 @@ class Creature(pygame.sprite.Sprite):
         self.freeMoves = 0
         self.children = 0
 
+    def getData(self):
+        return[self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY, self.direction]
+
     def mutate(self):
         pass
 
@@ -47,34 +51,37 @@ class Creature(pygame.sprite.Sprite):
     
     def update(self, foodList, action):
         
-        if (action == MOVE):
-            self.move()
-        elif (action == TURNLEFT):
-            self.turnLeft()
-        elif (action == TURNRIGHT):
-            self.turnRight()
-        elif (action == LOOK):
-            self.look(foodList)
-        
+        if (self.energy > 0):
+            if (action == MOVE):
+                self.move()
+            elif (action == TURNLEFT):
+                self.turnLeft()
+            elif (action == TURNRIGHT):
+                self.turnRight()
+            elif (action == LOOK):
+                self.look(foodList)
+            self.energy -= 1
+        else:
+            self.alive = False
+
         foodList = self.checkEat(foodList)
+
         return foodList
 
     def move(self):
-        if (self.energy > 0):
-            if (self.direction == UP and self.rect.centery > 5):
-                self.rect.centery -= self.speed
-                self.distanceTravelled += 1
-            elif (self.direction == DOWN and self.rect.centery < (WORLDSIZE - 5)):
-                self.rect.centery += self.speed
-                self.distanceTravelled += 1
-            elif (self.direction == LEFT and self.rect.centerx > 5):
-                self.rect.centerx -= self.speed
-                self.distanceTravelled += 1
-            elif (self.direction == RIGHT and self.rect.centerx < (WORLDSIZE - 5)):
-                self.rect.centerx += self.speed
-                self.distanceTravelled += 1
-            
-            self.energy -= 1
+
+        if (self.direction == UP and self.rect.centery > 5):
+            self.rect.centery -= self.speed
+            self.distanceTravelled += 1
+        elif (self.direction == DOWN and self.rect.centery < (WORLDSIZE - 5)):
+            self.rect.centery += self.speed
+            self.distanceTravelled += 1
+        elif (self.direction == LEFT and self.rect.centerx > 5):
+            self.rect.centerx -= self.speed
+            self.distanceTravelled += 1
+        elif (self.direction == RIGHT and self.rect.centerx < (WORLDSIZE - 5)):
+            self.rect.centerx += self.speed
+            self.distanceTravelled += 1
 
     def turnLeft(self):
         if (self.direction == UP):
@@ -91,7 +98,6 @@ class Creature(pygame.sprite.Sprite):
         x, y = self.rect.center
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        print(self.direction)
     
     def turnRight(self):
         if (self.direction == UP):
@@ -108,7 +114,6 @@ class Creature(pygame.sprite.Sprite):
         x, y = self.rect.center
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        print(self.direction)
 
     def checkEat(self, foodList):
         for food in foodList:
