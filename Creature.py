@@ -36,6 +36,7 @@ class Creature(pygame.sprite.Sprite):
         self.nearestFoodDistance = 0
         self.lastDirection = self.direction
         self.lastDirectionCount = 0
+        self.foodDirection = 0
 
         #performance stats
         self.distanceTravelled = 0
@@ -44,10 +45,9 @@ class Creature(pygame.sprite.Sprite):
         self.children = 0
 
     def getData(self):
-        return[self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY, self.nearestFoodDistance]
+        return[self.foodDirection, self.nearestFoodDistance]
     
     def update(self, foodList, action):
-        self.lastDistanceTravelled = self.distanceTravelled
         if (self.energy > 0):
             if (action == MOVE):
                 self.move()
@@ -170,6 +170,36 @@ class Creature(pygame.sprite.Sprite):
                 self.nearestFoodX = WORLDSIZE/2
                 self.nearestFoodY = WORLDSIZE/2
                 self.nearestFoodDistance = 500
+
+        if (self.direction == UP):
+            if (self.nearestFoodX < self.rect.centerx):
+                self.foodDirection = -1
+            elif (self.nearestFoodX == self.rect.centerx):
+                self.foodDirection = 0
+            else:
+                self.foodDirection = 1
+        elif (self.direction == DOWN):
+            if (self.nearestFoodX > self.rect.centerx):
+                self.foodDirection = -1
+            elif (self.nearestFoodX == self.rect.centerx):
+                self.foodDirection = 0
+            else:
+                self.foodDirection = 1
+        elif (self.direction == LEFT):
+            if (self.nearestFoodY > self.rect.centery):
+                self.foodDirection = -1
+            elif (self.nearestFoodY == self.rect.centery):
+                self.foodDirection = 0
+            else:
+                self.foodDirection = 1
+        else:
+            if (self.nearestFoodY < self.rect.centery):
+                self.foodDirection = -1
+            elif (self.nearestFoodY == self.rect.centery):
+                self.foodDirection = 0
+            else:
+                self.foodDirection = 1
+
         #print('({}, {})'.format(self.nearestFoodX, self.nearestFoodY))
 
     def getInfo(self):

@@ -1,5 +1,7 @@
-output = [1, 1.5, 3, 0.5]
+x1 = 10
+y1 = 10
 
-i = output.index(max(output)) + 1
+x2 = 20
+y2 = 20
 
-print(i)
+angle = 
