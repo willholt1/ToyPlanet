@@ -11,9 +11,9 @@ FPS = 1000
 SPAWNBORDER = 50
 
 POPULATION = 100
-FOODDENSITY = 30
+FOODDENSITY = 20
 FOODMULTIPLIER = 1
-FOODRESPAWN = 5
+FOODRESPAWN = 10
 
 GENOMEPATH = 'winner.pkl'
 MODE = 1
@@ -89,16 +89,6 @@ def runPlanetTrain(genomes, config):
         #keep program running at set FPS
         clock.tick(FPS)
 
-def replenishFood(foodList):
-    clusterX = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
-    clusterY = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
-    for i in range(random.randint(1, 3)):
-        x = clusterX + random.randint(-FOODDENSITY, FOODDENSITY)
-        y = clusterY + random.randint(-FOODDENSITY, FOODDENSITY)
-        foodSprite = Food.Food('sprites/plant.png', x, y)
-        foodList.append(foodSprite)
-    return foodList
-
 def runPlanet(genomes, config):
         
     #init NEAT
@@ -144,8 +134,21 @@ def runPlanet(genomes, config):
             decision = output.index(max(output)) + 1
             foodList = herbivore.update(foodList, decision)
             
+            #check if alive
             if (herbivore.alive):
                 aliveCreatues += 1
+            else:
+                herbivores.remove(herbivore)
+
+            #reproduce
+            
+            if (herbivore.energy > 600):
+                x = herbivore.rect.centerx + 5
+                y = herbivore.rect.centery + 5
+                animat = Creature.Creature('sprites/creature_blue.png', x, y)
+                herbivores.append(animat)
+                herbivore.energy -= 300
+            
 
         if (aliveCreatues == 0):
             running = False
@@ -166,6 +169,16 @@ def runPlanet(genomes, config):
         #keep program running at set FPS
         clock.tick(FPS)
 
+def replenishFood(foodList):
+    clusterX = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
+    clusterY = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
+    for i in range(random.randint(1, 7)):
+        x = clusterX + random.randint(-FOODDENSITY, FOODDENSITY)
+        y = clusterY + random.randint(-FOODDENSITY, FOODDENSITY)
+        foodSprite = Food.Food('sprites/plant.png', x, y)
+        foodList.append(foodSprite)
+    return foodList
+
 
 if __name__ == "__main__":
     #set config file
@@ -182,7 +195,7 @@ if __name__ == "__main__":
     
     if (MODE == 0):
         #run neat
-        winner = p.run(runPlanetTrain, 10)
+        winner = p.run(runPlanetTrain, 300)
         #save winner
         with open(GENOMEPATH, "wb") as f:
             pickle.dump(winner, f)

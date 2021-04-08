@@ -40,6 +40,8 @@ class Creature(pygame.sprite.Sprite):
         self.lastNearestFoodDistance = 0
         self.lastDirection = self.direction
         self.lastDirectionCount = 0
+        self.lastDistanceTravelled = 0
+        self.lastDistanceTravelledCount = 0
 
         #performance stats
         self.distanceTravelled = 0
@@ -58,6 +60,7 @@ class Creature(pygame.sprite.Sprite):
                 self.turnRight()
 
             self.lastDirectionCheck()
+            self.distanceTravelledCheck()
             self.look(foodList)
             foodList = self.checkEat(foodList)
             self.energy -= 1
@@ -179,6 +182,17 @@ class Creature(pygame.sprite.Sprite):
         self.lastDirection = self.direction
 
         if (self.lastDirectionCount >= self.viewDistance):
+            self.fitness -= 2
+
+    def distanceTravelledCheck(self):
+        if (self.distanceTravelled == self.lastDistanceTravelled):
+            self.lastDistanceTravelledCount += 1
+        else:
+            self.lastDistanceTravelledCount = 0
+
+        self.lastDistanceTravelled = self.distanceTravelled
+
+        if (self.lastDistanceTravelledCount >= 15):
             self.fitness -= 2
 
     #calculate the distance between two points
