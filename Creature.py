@@ -29,7 +29,7 @@ class Creature(pygame.sprite.Sprite):
 
         #status variables
         self.direction = UP
-        self.energy = 300
+        self.energy = 500
         self.alive = True
         self.fitness = 0
 
@@ -40,7 +40,6 @@ class Creature(pygame.sprite.Sprite):
         self.lastNearestFoodDistance = 0
         self.lastDirection = self.direction
         self.lastDirectionCount = 0
-        self.foodDirection = 0
 
         #performance stats
         self.distanceTravelled = 0
@@ -169,45 +168,8 @@ class Creature(pygame.sprite.Sprite):
             self.fitness -= 0.01
 
         self.lastNearestFoodDistance = self.nearestFoodDistance
-        self.checkFoodDirection()
 
-    #sets foodDirection to be -1 if the food is to the left, 0 if it is in front and 1 if it is to the right
-    #creatures gain fitness if the closest food is in front of them
-    def checkFoodDirection(self):
-        if (self.direction == UP):
-            if (self.nearestFoodX < self.rect.centerx):
-                self.foodDirection = -1
-            elif (self.nearestFoodX == self.rect.centerx):
-                self.foodDirection = 0
-                self.fitness += 0.1
-            else:
-                self.foodDirection = 1
-        elif (self.direction == DOWN):
-            if (self.nearestFoodX > self.rect.centerx):
-                self.foodDirection = -1
-            elif (self.nearestFoodX == self.rect.centerx):
-                self.foodDirection = 0
-                self.fitness += 0.1
-            else:
-                self.foodDirection = 1
-        elif (self.direction == LEFT):
-            if (self.nearestFoodY > self.rect.centery):
-                self.foodDirection = -1
-            elif (self.nearestFoodY == self.rect.centery):
-                self.foodDirection = 0
-                self.fitness += 0.1
-            else:
-                self.foodDirection = 1
-        else:
-            if (self.nearestFoodY < self.rect.centery):
-                self.foodDirection = -1
-            elif (self.nearestFoodY == self.rect.centery):
-                self.foodDirection = 0
-                self.fitness += 0.1
-            else:
-                self.foodDirection = 1
-
-    #lose fitness if creatures go in one direction for too long
+    #- fitness if creatures go in one direction for too long
     def lastDirectionCheck(self):
         if (self.direction == self.lastDirection):
             self.lastDirectionCount += 1
@@ -225,7 +187,6 @@ class Creature(pygame.sprite.Sprite):
 
     #data to be passed to the NN
     def getData(self):
-        #return[self.foodDirection, self.nearestFoodDistance]
         foodXDifference = self.nearestFoodX - self.rect.centerx
         foodYDifference = self.nearestFoodY - self.rect.centery
         if (self.direction == UP):
