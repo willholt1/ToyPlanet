@@ -9,7 +9,7 @@ FPS = 1000
 
 SPAWNBORDER = 50
 
-POPULATION = 50
+POPULATION = 75
 FOODDENSITY = 20
 FOODMULTIPLIER = 1
 
@@ -108,4 +108,4 @@ if __name__ == "__main__":
     p.add_reporter(stats)
 
     #run neat
-    p.run(runPlanet, 50)
+    p.run(runPlanet, 250)
