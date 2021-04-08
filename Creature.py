@@ -29,7 +29,7 @@ class Creature(pygame.sprite.Sprite):
 
         #status variables
         self.direction = UP
-        self.energy = 500
+        self.energy = 300
         self.alive = True
         self.fitness = 0
 

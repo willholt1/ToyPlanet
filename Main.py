@@ -9,9 +9,10 @@ FPS = 1000
 
 SPAWNBORDER = 50
 
-POPULATION = 75
-FOODDENSITY = 20
+POPULATION = 100
+FOODDENSITY = 30
 FOODMULTIPLIER = 1
+FOODRESPAWN = 5
 
 def runPlanet(genomes, config):
     
@@ -71,7 +72,7 @@ def runPlanet(genomes, config):
 
         #chance more food is generated. if more creatures, greater chance for food to be generated
         #(random.randint(0,100) < (30 - round(len(herbivores)/4))) and (len(foodList) < 500)
-        if (random.randint(0,100) < 1):
+        if (random.randint(0,100) < FOODRESPAWN):
             foodList = replenishFood(foodList)
 
         allSprites.add(herbivores, foodList)
@@ -88,7 +89,7 @@ def runPlanet(genomes, config):
 def replenishFood(foodList):
     clusterX = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
     clusterY = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
-    for i in range(random.randint(1, 6)):
+    for i in range(random.randint(1, 3)):
         x = clusterX + random.randint(-FOODDENSITY, FOODDENSITY)
         y = clusterY + random.randint(-FOODDENSITY, FOODDENSITY)
         foodSprite = Food.Food('sprites/plant.png', x, y)
@@ -108,4 +109,4 @@ if __name__ == "__main__":
     p.add_reporter(stats)
 
     #run neat
-    p.run(runPlanet, 250)
+    p.run(runPlanet, 300)
