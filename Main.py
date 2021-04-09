@@ -13,10 +13,11 @@ SPAWNBORDER = 50
 POPULATION = 100
 FOODDENSITY = 20
 FOODMULTIPLIER = 1
-FOODRESPAWN = 10
+FOODRESPAWN = 5
+FOODCLUMPSIZE = 3
 
 GENOMEPATH = 'winner.pkl'
-MODE = 1
+MODE = 0
 
 def runPlanetTrain(genomes, config):
     
@@ -172,7 +173,7 @@ def runPlanet(genomes, config):
 def replenishFood(foodList):
     clusterX = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
     clusterY = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
-    for i in range(random.randint(1, 7)):
+    for i in range(random.randint(1, FOODCLUMPSIZE)):
         x = clusterX + random.randint(-FOODDENSITY, FOODDENSITY)
         y = clusterY + random.randint(-FOODDENSITY, FOODDENSITY)
         foodSprite = Food.Food('sprites/plant.png', x, y)
