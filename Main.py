@@ -179,11 +179,11 @@ def runPlanet(genomes, config):
 def replenishFood(foodList):
     clusterX = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
     clusterY = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
-    for i in range(random.randint(1, FOODCLUMPSIZE)):
-        x = clusterX + random.randint(-FOODDENSITY, FOODDENSITY)
-        y = clusterY + random.randint(-FOODDENSITY, FOODDENSITY)
-        foodSprite = Food.Food('sprites/plant.png', x, y)
-        foodList.append(foodSprite)
+    #for i in range(random.randint(1, FOODCLUMPSIZE)):
+    x = clusterX + random.randint(-FOODDENSITY, FOODDENSITY)
+    y = clusterY + random.randint(-FOODDENSITY, FOODDENSITY)
+    foodSprite = Food.Food('sprites/plant.png', x, y)
+    foodList.append(foodSprite)
     return foodList
 
 
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     
     if (MODE == 0):
         #run neat
-        winner = p.run(runPlanetTrain, 5000)
+        winner = p.run(runPlanetTrain, 200)
         #save winner
         with open(GENOMEPATH, "wb") as f:
             pickle.dump(winner, f)
