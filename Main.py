@@ -10,7 +10,7 @@ FPS = 1000
 
 SPAWNBORDER = 50
 
-POPULATION = 100
+POPULATION = 10
 FOODDENSITY = 20
 FOODMULTIPLIER = 1
 FOODRESPAWN = 5
@@ -44,10 +44,12 @@ def runPlanetTrain(genomes, config):
             
         herbivores.append(animat)
 
+    
     foodList = []
     for i in range(POPULATION * FOODMULTIPLIER):
         foodList = replenishFood(foodList)
 
+    lastFoodLen = len(foodList)
     ###########
     #Main loop#
     ###########
@@ -76,8 +78,12 @@ def runPlanetTrain(genomes, config):
 
         #chance more food is generated. if more creatures, greater chance for food to be generated
         #(random.randint(0,100) < (30 - round(len(herbivores)/4))) and (len(foodList) < 500)
-        if (random.randint(0,100) < FOODRESPAWN):
+        #if (random.randint(0,100) < FOODRESPAWN):
+        #    foodList = replenishFood(foodList)
+        if (len(foodList)< lastFoodLen):
             foodList = replenishFood(foodList)
+        
+        lastFoodLen = len(foodList)
 
         allSprites.add(herbivores, foodList)
         #Draw
@@ -126,7 +132,7 @@ def runPlanet(genomes, config):
             #closing window
             if event.type == pygame.QUIT:
                 pygame.quit()
-
+        
         #Update
         allSprites.empty()
         aliveCreatues = 0
@@ -142,18 +148,18 @@ def runPlanet(genomes, config):
                 herbivores.remove(herbivore)
 
             #reproduce
-            
+            '''
             if (herbivore.energy > 600):
                 x = herbivore.rect.centerx + 5
                 y = herbivore.rect.centery + 5
                 animat = Creature.Creature('sprites/creature_blue.png', x, y)
                 herbivores.append(animat)
                 herbivore.energy -= 300
-            
+            '''
 
         if (aliveCreatues == 0):
             running = False
-
+        
         #chance more food is generated. if more creatures, greater chance for food to be generated
         #(random.randint(0,100) < (30 - round(len(herbivores)/4))) and (len(foodList) < 500)
         if (random.randint(0,100) < FOODRESPAWN):
@@ -196,7 +202,7 @@ if __name__ == "__main__":
     
     if (MODE == 0):
         #run neat
-        winner = p.run(runPlanetTrain, 300)
+        winner = p.run(runPlanetTrain, 5000)
         #save winner
         with open(GENOMEPATH, "wb") as f:
             pickle.dump(winner, f)
@@ -205,8 +211,6 @@ if __name__ == "__main__":
         # load winner
         with open(GENOMEPATH, "rb") as f:
             genomes = pickle.load(f)
-
-        # Convert loaded genome into required data structure
-        #genomes = [(1, genome)]
+            f.close()
 
         runPlanet(genomes, config)
