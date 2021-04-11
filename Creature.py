@@ -26,11 +26,11 @@ class Creature(pygame.sprite.Sprite):
         
         #creature attributes
         self.speed = 1
-        self.viewDistance = 800
+        self.viewDistance = 250
 
         #status variables
         self.direction = UP
-        self.energy = 1500
+        self.energy = 800
         self.alive = True
         self.fitness = 0
 
@@ -46,6 +46,10 @@ class Creature(pygame.sprite.Sprite):
         self.savedPointX = self.rect.centerx
         self.savedPointY = self.rect.centery
         self.foodInView = 0
+        self.upFood = 0
+        self.downFood = 0
+        self.leftFood = 0
+        self.rightFood = 0
 
         #performance stats
         self.distanceTravelled = 0
@@ -66,7 +70,7 @@ class Creature(pygame.sprite.Sprite):
                 self.move()
 
             #self.lastDirectionCheck()
-            self.distanceTravelledCheck()
+            #self.distanceTravelledCheck()
             self.look(foodList)
             foodList = self.checkEat(foodList)
             self.energy -= 1
@@ -144,27 +148,36 @@ class Creature(pygame.sprite.Sprite):
     def look(self, foodList):
         self.nearestFoodDistance = self.viewDistance
         self.foodInView = 0
+        self.upFood = 0
+        self.downFood = 0
+        self.leftFood = 0
+        self.rightFood = 0
         #loop through all the food
         for food in foodList:
             distance = WORLDSIZE
-            #calculate distance if food is in front
-            #if ((self.direction == UP) and (food.rect.centery < self.rect.centery) or 
-            #((self.direction == DOWN) and (food.rect.centery > self.rect.centery)) or 
-            #((self.direction == LEFT) and (food.rect.centerx < self.rect.centerx)) or 
-            #((self.direction == RIGHT) and (food.rect.centerx > self.rect.centerx))):
-                #if food is in front, calculate distance
+            
             distance = self.getDistance(self.rect.centerx, self.rect.centery, food.rect.centerx, food.rect.centery)
 
-            #if the food is within view 
-            if ((distance < self.viewDistance) and (distance < self.nearestFoodDistance)):        
-                self.nearestFoodDistance = distance    
-                self.nearestFoodX = food.rect.centerx
-                self.nearestFoodY = food.rect.centery
+            if (distance < self.viewDistance):
                 self.foodInView += 1
+                if (food.rect.centery < self.rect.centery):
+                    self.upFood += 1
+                elif (food.rect.centery > self.rect.centery):
+                    self.downFood += 1
+                elif (food.rect.centerx < self.rect.centerx):
+                    self.leftFood += 1
+                else:
+                    self.rightFood +=1
+                #if the food is within view 
+                if (distance < self.nearestFoodDistance):        
+                    self.nearestFoodDistance = distance    
+                    self.nearestFoodX = food.rect.centerx
+                    self.nearestFoodY = food.rect.centery
+                    
 
 
         #if no food was in view set center as closest food
-        if (self.nearestFoodDistance == WORLDSIZE):
+        if (self.foodInView == 0):
             self.nearestFoodDistance = self.getDistance(self.rect.centerx, self.rect.centery, 500, 500)
             self.nearestFoodX = WORLDSIZE/2
             self.nearestFoodY = WORLDSIZE/2
@@ -173,7 +186,7 @@ class Creature(pygame.sprite.Sprite):
         #if (self.nearestFoodDistance < self.lastNearestFoodDistance):
         #    self.fitness += 0.01
         #else:
-        self.fitness -= 0.01
+        #self.fitness -= 0.01
 
         self.lastNearestFoodDistance = self.nearestFoodDistance
 
@@ -234,21 +247,33 @@ class Creature(pygame.sprite.Sprite):
             distanceFromCreatureForward = distanceFromTop
             distanceFromCreatureLeft = distanceFromLeft
             distanceFromCreatureRight = distanceFromRight
+            foodForward = self.upFood
+            foodLeft = self.leftFood
+            foodRight = self.rightFood
         elif (self.direction == DOWN):
             A = (0, 1)
             distanceFromCreatureForward = distanceFromBottom
             distanceFromCreatureLeft = distanceFromRight
             distanceFromCreatureRight = distanceFromLeft
+            foodForward = self.downFood
+            foodLeft = self.rightFood
+            foodRight = self.leftFood
         elif (self.direction == LEFT):
             A = (-1, 0)
             distanceFromCreatureForward = distanceFromLeft
             distanceFromCreatureLeft = distanceFromBottom
             distanceFromCreatureRight = distanceFromTop
+            foodForward = self.leftFood
+            foodLeft = self.downFood
+            foodRight = self.upFood
         else:
             A = (1, 0)
             distanceFromCreatureForward = distanceFromRight
             distanceFromCreatureLeft = distanceFromTop
             distanceFromCreatureRight = distanceFromBottom
+            foodForward = self.rightFood
+            foodLeft = self.upFood
+            foodRight = self.downFood
 
         B = self.getVectors(self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY)
             
@@ -260,4 +285,4 @@ class Creature(pygame.sprite.Sprite):
 
         #angle = angle/180
 
-        return[self.foodInView, self.nearestFoodDistance, angle, distanceFromCreatureForward, distanceFromCreatureLeft, distanceFromCreatureRight]
+        return[self.nearestFoodDistance, angle, foodForward, foodLeft, foodRight, distanceFromCreatureForward, distanceFromCreatureLeft, distanceFromCreatureRight]

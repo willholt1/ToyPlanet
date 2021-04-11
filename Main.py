@@ -10,14 +10,14 @@ FPS = 1000
 
 SPAWNBORDER = 50
 
-POPULATION = 10
+POPULATION = 20
 FOODDENSITY = 20
 FOODMULTIPLIER = 1
 FOODRESPAWN = 5
 FOODCLUMPSIZE = 3
 
 GENOMEPATH = 'winner.pkl'
-MODE = 0
+MODE = 1
 
 def runPlanetTrain(genomes, config):
     
@@ -38,8 +38,8 @@ def runPlanetTrain(genomes, config):
         nets.append(net)
         genome.fitness = 0
 
-        x = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
-        y = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
+        x = 500
+        y = 500
         animat = Creature.Creature('sprites/creature_blue.png', x, y)
             
         herbivores.append(animat)
@@ -148,14 +148,14 @@ def runPlanet(genomes, config):
                 herbivores.remove(herbivore)
 
             #reproduce
-            '''
-            if (herbivore.energy > 600):
+            
+            if (herbivore.energy > 1000):
                 x = herbivore.rect.centerx + 5
                 y = herbivore.rect.centery + 5
                 animat = Creature.Creature('sprites/creature_blue.png', x, y)
                 herbivores.append(animat)
                 herbivore.energy -= 300
-            '''
+            
 
         if (aliveCreatues == 0):
             running = False
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     
     if (MODE == 0):
         #run neat
-        winner = p.run(runPlanetTrain, 200)
+        winner = p.run(runPlanetTrain, 250)
         #save winner
         with open(GENOMEPATH, "wb") as f:
             pickle.dump(winner, f)
