@@ -17,7 +17,7 @@ TURNLEFT = 2
 TURNRIGHT = 3
 
 class Creature(pygame.sprite.Sprite):
-    def __init__(self, image, x, y):
+    def __init__(self, image, x, y, speed):
         pygame.sprite.Sprite.__init__(self)
         self.originalImage = pygame.image.load(image).convert_alpha()
         self.image = self.originalImage
@@ -25,7 +25,7 @@ class Creature(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         
         #creature attributes
-        self.speed = 1
+        self.speed = speed
         self.viewDistance = 250
 
         #status variables
@@ -38,13 +38,6 @@ class Creature(pygame.sprite.Sprite):
         self.nearestFoodX = WORLDSIZE/2
         self.nearestFoodY = WORLDSIZE/2
         self.nearestFoodDistance = 0
-        self.lastNearestFoodDistance = 0
-        self.lastDirection = self.direction
-        self.lastDirectionCount = 0
-        #self.distanceFromSavedPoint = 0
-        self.distanceFromSavedPointCount = 0
-        self.savedPointX = self.rect.centerx
-        self.savedPointY = self.rect.centery
         self.foodInView = 0
         self.upFood = 0
         self.downFood = 0
@@ -69,8 +62,6 @@ class Creature(pygame.sprite.Sprite):
                 self.turnRight()
                 self.move()
 
-            #self.lastDirectionCheck()
-            #self.distanceTravelledCheck()
             self.look(foodList)
             foodList = self.checkEat(foodList)
             self.energy -= 1
@@ -174,52 +165,17 @@ class Creature(pygame.sprite.Sprite):
                     self.nearestFoodX = food.rect.centerx
                     self.nearestFoodY = food.rect.centery
                     
-
-
         #if no food was in view set center as closest food
         if (self.foodInView == 0):
             self.nearestFoodDistance = self.getDistance(self.rect.centerx, self.rect.centery, 500, 500)
             self.nearestFoodX = WORLDSIZE/2
             self.nearestFoodY = WORLDSIZE/2
-        
-        #if the creatue is closer to the nearest piece of food increase fitness, if it is further away then decrease
-        #if (self.nearestFoodDistance < self.lastNearestFoodDistance):
-        #    self.fitness += 0.01
-        #else:
-        #self.fitness -= 0.01
-
-        self.lastNearestFoodDistance = self.nearestFoodDistance
-
-    #- fitness if creatures go in one direction for too long
-    def lastDirectionCheck(self):
-        if (self.direction == self.lastDirection):
-            self.lastDirectionCount += 1
-        else:
-            self.lastDirectionCount = 0
-
-        self.lastDirection = self.direction
-
-        if (self.lastDirectionCount >= self.viewDistance):
-            self.fitness -= 1
-
-    #anti spinning around
-    def distanceTravelledCheck(self):
-        distanceFromSavedPoint = self.getDistance(self.rect.centerx, self.rect.centery, self.savedPointX, self.savedPointY)
-        
-        if (distanceFromSavedPoint < 30):
-            self.distanceFromSavedPointCount += 1
-        else:
-            self.distanceFromSavedPointCount = 0
-            self.savedPointX = self.rect.centerx
-            self.savedPointY = self.rect.centery
-        
-        if (self.distanceFromSavedPointCount > 60):
-            self.fitness -= 1
             
     #calculate the distance between two points
     def getDistance(self, x1, y1, x2, y2):
         return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
         
+    #calculate the angle between two vectors
     def angleBetween(self, p1, p2):
         ang1 = np.arctan2(*p1[::-1])
         ang2 = np.arctan2(*p2[::-1])
@@ -232,7 +188,6 @@ class Creature(pygame.sprite.Sprite):
 
     #data to be passed to the NN
     def getData(self):
-
         distanceFromTop = self.rect.centery
         distanceFromBottom = (1000 - self.rect.centery)
         distanceFromLeft = self.rect.centerx
@@ -282,7 +237,5 @@ class Creature(pygame.sprite.Sprite):
         if angle > 180:
             angle = 360 - angle
             angle = angle * -1
-
-        #angle = angle/180
 
         return[self.nearestFoodDistance, angle, foodForward, foodLeft, foodRight, distanceFromCreatureForward, distanceFromCreatureLeft, distanceFromCreatureRight]

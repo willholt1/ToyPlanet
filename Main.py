@@ -1,6 +1,7 @@
 import pygame
 import random
 import Creature
+import Herbivore
 import Food
 import neat
 import pickle
@@ -14,16 +15,14 @@ POPULATION = 20
 FOODDENSITY = 20
 FOODMULTIPLIER = 1
 FOODRESPAWN = 5
-FOODCLUMPSIZE = 3
+FOODCLUMPSIZE = 8
 
-GENOMEPATH = 'winner.pkl'
-MODE = 1
+MODE = 2
 
-def runPlanetTrain(genomes, config):
-    
+def trainPredator(genomes, config):
     #init NEAT
     nets = []
-    herbivores = []
+    predators = []
 
     pygame.init()
 
@@ -40,7 +39,90 @@ def runPlanetTrain(genomes, config):
 
         x = 500
         y = 500
-        animat = Creature.Creature('sprites/creature_blue.png', x, y)
+        animat = Creature.Creature('sprites/creature_red.png', x, y, 1)
+            
+        predators.append(animat)
+
+    
+    foodList = []
+    for i in range(POPULATION * FOODMULTIPLIER):
+        foodList = replenishFood(foodList)
+
+    lastFoodLen = len(foodList)
+    ###########
+    #Main loop#
+    ###########
+    running = True
+    while running:
+        #Events
+        for event in pygame.event.get():
+            #closing window
+            if (event.type == pygame.QUIT):
+                pygame.quit()
+
+        #Update
+        allSprites.empty()
+        aliveCreatues = 0
+        for i, predator in enumerate(predators):
+            output = nets[i].activate(predator.getData())
+            decision = output.index(max(output)) + 1
+            foodList = predator.update(foodList, decision)
+            genomes[i][1].fitness = predator.fitness
+            
+            if (predator.alive):
+                aliveCreatues += 1
+
+        if (aliveCreatues == 0):
+            running = False
+
+        if (len(foodList)< lastFoodLen):
+            foodList = replenishFood(foodList)
+        
+        lastFoodLen = len(foodList)
+
+        allSprites.add(predators, foodList)
+        #Draw
+        screen.fill((245, 222, 179))
+        allSprites.draw(screen)
+        pygame.display.flip()
+
+        #keep program running at set FPS
+        clock.tick(FPS)
+############################END trainPredator############################
+
+def trainHerbivore(genomes, config):
+    
+    #init NEAT
+    nets = []
+    herbivores = []
+
+    pygame.init()
+
+    screen = pygame.display.set_mode((WORLDSIZE, WORLDSIZE))
+    pygame.display.set_caption('Toy Planet')
+    clock = pygame.time.Clock()
+    allSprites = pygame.sprite.Group()
+    
+    # load predator genome
+    with open("predator.pkl", "rb") as f:
+        predatorGenome = pickle.load(f)
+        f.close()
+    #create predator
+    predatorNet = neat.nn.FeedForwardNetwork.create(predatorGenome, config)
+
+    x = 10
+    y = 10
+    predator = Creature.Creature('sprites/creature_red.png', x, y, 1)
+
+    #create herbivores
+    for id, genome in genomes:
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
+        nets.append(net)
+        genome.fitness = 0
+
+        x = 500
+        y = 500
+        animat = Herbivore.Herbivore('sprites/creature_blue.png', x, y, 2)
             
         herbivores.append(animat)
 
@@ -58,7 +140,7 @@ def runPlanetTrain(genomes, config):
         #Events
         for event in pygame.event.get():
             #closing window
-            if event.type == pygame.QUIT:
+            if (event.type == pygame.QUIT):
                 pygame.quit()
 
         #Update
@@ -76,10 +158,6 @@ def runPlanetTrain(genomes, config):
         if (aliveCreatues == 0):
             running = False
 
-        #chance more food is generated. if more creatures, greater chance for food to be generated
-        #(random.randint(0,100) < (30 - round(len(herbivores)/4))) and (len(foodList) < 500)
-        #if (random.randint(0,100) < FOODRESPAWN):
-        #    foodList = replenishFood(foodList)
         if (len(foodList)< lastFoodLen):
             foodList = replenishFood(foodList)
         
@@ -89,17 +167,17 @@ def runPlanetTrain(genomes, config):
         #Draw
         screen.fill((245, 222, 179))
         allSprites.draw(screen)
-        
-        #always flip last
         pygame.display.flip()
 
         #keep program running at set FPS
         clock.tick(FPS)
+############################END trainHerbivore############################
 
-def runPlanet(genomes, config):
+def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         
     #init NEAT
     herbivores = []
+    predators = []
 
     pygame.init()
 
@@ -108,15 +186,24 @@ def runPlanet(genomes, config):
     clock = pygame.time.Clock()
     allSprites = pygame.sprite.Group()
 
-    net = neat.nn.FeedForwardNetwork.create(genomes, config)
+    herbivoreNet = neat.nn.FeedForwardNetwork.create(herbivoreGenome, herbivoreConfig)
+    predatorNet = neat.nn.FeedForwardNetwork.create(predatorGenome, predatorConfig)
 
-    for id in (range(POPULATION)):
-
+    #create herbivores
+    for i in range(round(POPULATION * 0.9)):
         x = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
         y = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
-        animat = Creature.Creature('sprites/creature_blue.png', x, y)
+        animat = Herbivore.Herbivore('sprites/creature_blue.png', x, y, 2)
             
         herbivores.append(animat)
+    
+    #create predators
+    for i in range(round(POPULATION * 0.1)):
+        x = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
+        y = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
+        animat = Creature.Creature('sprites/creature_red.png', x, y, 1)
+            
+        predators.append(animat)
 
     foodList = []
     for i in range(POPULATION * FOODMULTIPLIER):
@@ -130,14 +217,14 @@ def runPlanet(genomes, config):
         #Events
         for event in pygame.event.get():
             #closing window
-            if event.type == pygame.QUIT:
+            if (event.type == pygame.QUIT):
                 pygame.quit()
         
         #Update
         allSprites.empty()
         aliveCreatues = 0
         for herbivore in herbivores:
-            output = net.activate(herbivore.getData())
+            output = herbivoreNet.activate(herbivore.getData())
             decision = output.index(max(output)) + 1
             foodList = herbivore.update(foodList, decision)
             
@@ -150,13 +237,34 @@ def runPlanet(genomes, config):
             #reproduce
             
             if (herbivore.energy > 1000):
-                x = herbivore.rect.centerx + 5
-                y = herbivore.rect.centery + 5
-                animat = Creature.Creature('sprites/creature_blue.png', x, y)
+                x = herbivore.rect.centerx + 10
+                y = herbivore.rect.centery + 10
+                animat = Herbivore.Herbivore('sprites/creature_blue.png', x, y, 2)
                 herbivores.append(animat)
                 herbivore.energy -= 300
+                herbivore.children += 1
+        
+        for predator in predators:
+            output = predatorNet.activate(predator.getData())
+            decision = output.index(max(output)) + 1
+            herbivores = predator.update(herbivores, decision)
             
+            #check if alive
+            if (predator.alive):
+                aliveCreatues += 1
+            else:
+                predators.remove(predator)
 
+            #reproduce
+            
+            if (predator.energy > 1000000):
+                x = herbivore.rect.centerx + 10
+                y = herbivore.rect.centery + 10
+                animat = Creature.Creature('sprites/creature_red.png', x, y, 1)
+                predators.append(animat)
+                predator.energy -= 300
+                predator.children += 1
+            
         if (aliveCreatues == 0):
             running = False
         
@@ -165,31 +273,37 @@ def runPlanet(genomes, config):
         if (random.randint(0,100) < FOODRESPAWN):
             foodList = replenishFood(foodList)
 
-        allSprites.add(herbivores, foodList)
+        allSprites.add(foodList, herbivores, predators)
+
         #Draw
         screen.fill((245, 222, 179))
         allSprites.draw(screen)
-        
-        #always flip last
         pygame.display.flip()
 
         #keep program running at set FPS
         clock.tick(FPS)
+############################END runPlanet############################
 
 def replenishFood(foodList):
     clusterX = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
     clusterY = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
-    #for i in range(random.randint(1, FOODCLUMPSIZE)):
-    x = clusterX + random.randint(-FOODDENSITY, FOODDENSITY)
-    y = clusterY + random.randint(-FOODDENSITY, FOODDENSITY)
-    foodSprite = Food.Food('sprites/plant.png', x, y)
-    foodList.append(foodSprite)
+    for i in range(random.randint(1, FOODCLUMPSIZE)):
+        x = clusterX + random.randint(-FOODDENSITY, FOODDENSITY)
+        y = clusterY + random.randint(-FOODDENSITY, FOODDENSITY)
+        foodSprite = Food.Food('sprites/plant.png', x, y)
+        foodList.append(foodSprite)
     return foodList
 
 
 if __name__ == "__main__":
     #set config file
-    configPath = './neat-config.txt'
+    if (MODE == 0):
+        configPath = './neat-config-predators.txt'
+    elif (MODE == 1):
+        configPath = './neat-config-herbivores.txt'
+    else:
+        configPath = './neat-config-predators.txt'
+
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPath)
 
     p = neat.Population(config)
@@ -201,16 +315,37 @@ if __name__ == "__main__":
 
     
     if (MODE == 0):
+        print('Training Predators...')
         #run neat
-        winner = p.run(runPlanetTrain, 250)
+        winner = p.run(trainPredator, 500)
         #save winner
-        with open(GENOMEPATH, "wb") as f:
+        with open("predator.pkl", "wb") as f:
+            pickle.dump(winner, f)
+            f.close()
+    elif (MODE == 1):
+        print('Training Herbivores...')
+        #run neat
+        winner = p.run(trainHerbivore, 500)
+        #save winner
+        with open("herbivore.pkl", "wb") as f:
             pickle.dump(winner, f)
             f.close()
     else:
-        # load winner
-        with open(GENOMEPATH, "rb") as f:
-            genomes = pickle.load(f)
+        print('Running Simulation...')
+        configPathHerbivore = './neat-config-herbivores.txt'
+        configPathPredator = './neat-config-predators.txt'
+
+        herbivoreConfig = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPathHerbivore)
+        predatorConfig = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPathPredator)
+
+        # load herbivore
+        with open("herbivore.pkl", "rb") as f:
+            herbivoreGenome = pickle.load(f)
             f.close()
 
-        runPlanet(genomes, config)
+        # load predator
+        with open("predator.pkl", "rb") as f:
+            predatorGenome = pickle.load(f)
+            f.close()
+
+        runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig)
