@@ -49,26 +49,6 @@ class Creature(pygame.sprite.Sprite):
         self.foodEaten = 0 
         self.freeMoves = 0
         self.children = 0
-    
-    def update(self, foodList, action):
-        if (self.energy > 0):
-            #perform action determined by the NN
-            if (action == MOVE):
-                self.move()
-            elif (action == TURNLEFT):
-                self.turnLeft()
-                self.move()
-            elif (action == TURNRIGHT):
-                self.turnRight()
-                self.move()
-
-            self.look(foodList)
-            foodList = self.checkEat(foodList)
-            self.energy -= 1
-        else:
-            self.alive = False
-
-        return foodList
 
     def move(self):
         if (self.direction == UP and self.rect.centery > 5):
@@ -85,7 +65,7 @@ class Creature(pygame.sprite.Sprite):
             self.distanceTravelled += 1
         else:
             #decrease fitness if move is invalid
-            self.fitness -= 100
+            self.fitness -= 20
             self.alive = False
 
     def turnLeft(self):
@@ -133,7 +113,7 @@ class Creature(pygame.sprite.Sprite):
     def eat(self, food):
         self.energy += food.energy
         self.foodEaten += 1
-        self.fitness += 10
+        self.fitness += 1
 
     #sets the coordinates of the closest piece of food within view
     def look(self, foodList):
@@ -167,9 +147,9 @@ class Creature(pygame.sprite.Sprite):
                     
         #if no food was in view set center as closest food
         if (self.foodInView == 0):
-            self.nearestFoodDistance = self.getDistance(self.rect.centerx, self.rect.centery, 500, 500)
-            self.nearestFoodX = WORLDSIZE/2
-            self.nearestFoodY = WORLDSIZE/2
+            self.nearestFoodDistance = self.getDistance(self.rect.centerx, self.rect.centery, 750, 750)
+            self.nearestFoodX = 500
+            self.nearestFoodY = 500
             
     #calculate the distance between two points
     def getDistance(self, x1, y1, x2, y2):
@@ -185,6 +165,12 @@ class Creature(pygame.sprite.Sprite):
         xVector = foodX - creatureX
         yVector = foodY - creatureY
         return (xVector, yVector)
+
+    def adjustAngle(self, angle):
+        if angle > 180:
+            angle = 360 - angle
+            angle = angle * -1
+        return angle
 
     #data to be passed to the NN
     def getData(self):
@@ -234,8 +220,6 @@ class Creature(pygame.sprite.Sprite):
             
         angle = self.angleBetween(A, B)
 
-        if angle > 180:
-            angle = 360 - angle
-            angle = angle * -1
+        angle = self.adjustAngle(angle)
 
         return[self.nearestFoodDistance, angle, foodForward, foodLeft, foodRight, distanceFromCreatureForward, distanceFromCreatureLeft, distanceFromCreatureRight]

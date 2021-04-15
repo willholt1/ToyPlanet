@@ -1,7 +1,7 @@
 import pygame
 import random
-import Creature
 import Herbivore
+import Predator
 import Food
 import neat
 import pickle
@@ -17,7 +17,10 @@ FOODMULTIPLIER = 1
 FOODRESPAWN = 5
 FOODCLUMPSIZE = 8
 
-MODE = 2
+#0 = train predators
+#1 = train herbivores
+#2 = run planet
+MODE = 1
 
 def trainPredator(genomes, config):
     #init NEAT
@@ -39,14 +42,14 @@ def trainPredator(genomes, config):
 
         x = 500
         y = 500
-        animat = Creature.Creature('sprites/creature_red.png', x, y, 1)
+        predator = Predator.Predator('sprites/creature_red.png', x, y, 1)
             
-        predators.append(animat)
+        predators.append(predator)
 
     
     foodList = []
     for i in range(POPULATION * FOODMULTIPLIER):
-        foodList = replenishFood(foodList)
+        foodList = trainReplenishFood(foodList)
 
     lastFoodLen = len(foodList)
     ###########
@@ -76,7 +79,7 @@ def trainPredator(genomes, config):
             running = False
 
         if (len(foodList)< lastFoodLen):
-            foodList = replenishFood(foodList)
+            foodList = trainReplenishFood(foodList)
         
         lastFoodLen = len(foodList)
 
@@ -95,6 +98,7 @@ def trainHerbivore(genomes, config):
     #init NEAT
     nets = []
     herbivores = []
+    predators = []
 
     pygame.init()
 
@@ -103,16 +107,23 @@ def trainHerbivore(genomes, config):
     clock = pygame.time.Clock()
     allSprites = pygame.sprite.Group()
     
+    '''
+    configPathPredator = './neat-config-predators.txt'
+
+    predatorConfig = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPathPredator)
     # load predator genome
     with open("predator.pkl", "rb") as f:
         predatorGenome = pickle.load(f)
         f.close()
-    #create predator
-    predatorNet = neat.nn.FeedForwardNetwork.create(predatorGenome, config)
+    #create predators
+    predatorNet = neat.nn.FeedForwardNetwork.create(predatorGenome, predatorConfig)
+    '''
 
-    x = 10
-    y = 10
-    predator = Creature.Creature('sprites/creature_red.png', x, y, 1)
+    for i in range(15):
+        x = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
+        y = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
+        predator = Predator.Predator('sprites/creature_red.png', x, y, 1)
+        predators.append(predator)
 
     #create herbivores
     for id, genome in genomes:
@@ -128,8 +139,8 @@ def trainHerbivore(genomes, config):
 
     
     foodList = []
-    for i in range(POPULATION * FOODMULTIPLIER):
-        foodList = replenishFood(foodList)
+    for i in range(30):
+        foodList = trainReplenishFood(foodList)
 
     lastFoodLen = len(foodList)
     ###########
@@ -147,23 +158,28 @@ def trainHerbivore(genomes, config):
         allSprites.empty()
         aliveCreatues = 0
         for i, herbivore in enumerate(herbivores):
-            output = nets[i].activate(herbivore.getData())
-            decision = output.index(max(output)) + 1
-            foodList = herbivore.update(foodList, decision)
-            genomes[i][1].fitness = herbivore.fitness
-            
             if (herbivore.alive):
+                output = nets[i].activate(herbivore.getData())
+                decision = output.index(max(output)) + 1
+                foodList = herbivore.update(foodList, predators, decision)
+                genomes[i][1].fitness = herbivore.fitness
                 aliveCreatues += 1
 
         if (aliveCreatues == 0):
             running = False
 
+        for predator in predators:
+            #output = predatorNet.activate(predator.getData())
+            #decision = output.index(max(output)) + 1
+            decision = 5
+            herbivores = predator.update(herbivores, decision)
+
         if (len(foodList)< lastFoodLen):
-            foodList = replenishFood(foodList)
+            foodList = trainReplenishFood(foodList)
         
         lastFoodLen = len(foodList)
 
-        allSprites.add(herbivores, foodList)
+        allSprites.add(predators, herbivores, foodList)
         #Draw
         screen.fill((245, 222, 179))
         allSprites.draw(screen)
@@ -201,13 +217,13 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
     for i in range(round(POPULATION * 0.1)):
         x = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
         y = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
-        animat = Creature.Creature('sprites/creature_red.png', x, y, 1)
+        animat = Predator.Predator('sprites/creature_red.png', x, y, 1)
             
         predators.append(animat)
 
     foodList = []
     for i in range(POPULATION * FOODMULTIPLIER):
-        foodList = replenishFood(foodList)
+        foodList = runReplenishFood(foodList)
 
     ###########
     #Main loop#
@@ -226,7 +242,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         for herbivore in herbivores:
             output = herbivoreNet.activate(herbivore.getData())
             decision = output.index(max(output)) + 1
-            foodList = herbivore.update(foodList, decision)
+            foodList = herbivore.update(foodList, predators, decision)
             
             #check if alive
             if (herbivore.alive):
@@ -260,7 +276,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
             if (predator.energy > 1000000):
                 x = herbivore.rect.centerx + 10
                 y = herbivore.rect.centery + 10
-                animat = Creature.Creature('sprites/creature_red.png', x, y, 1)
+                animat = Predator.Predator('sprites/creature_red.png', x, y, 1)
                 predators.append(animat)
                 predator.energy -= 300
                 predator.children += 1
@@ -271,7 +287,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         #chance more food is generated. if more creatures, greater chance for food to be generated
         #(random.randint(0,100) < (30 - round(len(herbivores)/4))) and (len(foodList) < 500)
         if (random.randint(0,100) < FOODRESPAWN):
-            foodList = replenishFood(foodList)
+            foodList = runReplenishFood(foodList)
 
         allSprites.add(foodList, herbivores, predators)
 
@@ -284,7 +300,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         clock.tick(FPS)
 ############################END runPlanet############################
 
-def replenishFood(foodList):
+def runReplenishFood(foodList):
     clusterX = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
     clusterY = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
     for i in range(random.randint(1, FOODCLUMPSIZE)):
@@ -294,6 +310,14 @@ def replenishFood(foodList):
         foodList.append(foodSprite)
     return foodList
 
+def trainReplenishFood(foodList):
+    clusterX = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
+    clusterY = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
+    x = clusterX + random.randint(-FOODDENSITY, FOODDENSITY)
+    y = clusterY + random.randint(-FOODDENSITY, FOODDENSITY)
+    foodSprite = Food.Food('sprites/plant.png', x, y)
+    foodList.append(foodSprite)
+    return foodList
 
 if __name__ == "__main__":
     #set config file
