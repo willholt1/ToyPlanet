@@ -46,6 +46,7 @@ class Herbivore(Creature.Creature):
             Creature.Creature.look(self, foodList)
             self.lookPredators(predators)
             foodList = Creature.Creature.checkEat(self, foodList)
+
             self.energy -= 1
         else:
             self.alive = False
@@ -78,7 +79,6 @@ class Herbivore(Creature.Creature):
                     self.rightPredator +=1
                 '''
 
-                #if the food is within view 
                 if (distance < self.nearestPredatorDistance):
                     self.nearestPredatorDistance = distance
                     self.nearestPredatorX = predator.rect.centerx
@@ -98,28 +98,29 @@ class Herbivore(Creature.Creature):
         distanceFromLeft = self.rect.centerx
         distanceFromRight = (1000 - self.rect.centerx)
 
-        predatorUp = 1000
-        predatorDown = 1000
-        predatorLeft = 1000
-        predatorRight = 1000
+        predatorUp = 0
+        predatorDown = 0
+        predatorLeft = 0
+        predatorRight = 0
 
-        if (self.nearestPredatorDistance < 50):
-            predatorXdif = self.nearestPredatorX - self.rect.centerx
-            predatorYdif = self.nearestPredatorY - self.rect.centery
-            if (predatorXdif < 0):
-                predatorLeft = predatorXdif * -1
-                predatorRight = 1000
-            else:
-                predatorRight = predatorXdif
-                predatorLeft = 1000
-
-            if (predatorYdif < 0):
-                predatorUp = predatorYdif * -1
-                predatorDown = 1000
-            else:
-                predatorDown = predatorYdif
-                predatorUp = 1000
-
+        
+        #in view up
+        if (((self.rect.centery - 20) <= self.nearestPredatorY <= self.rect.centery) and ((self.rect.centerx - 10) <= self.nearestPredatorX <= (self.rect.centerx + 10))):
+            predatorUp = 1
+            #print("close up")
+        #in view down
+        elif ((self.rect.centery <= self.nearestPredatorY <= (self.rect.centery + 20)) and ((self.rect.centerx - 10) <= self.nearestPredatorX <= (self.rect.centerx + 10))):
+            predatorDown = 1
+            #print("close down")
+        #in view left
+        elif (((self.rect.centerx - 20) <= self.nearestPredatorX <= self.rect.centerx) and ((self.rect.centery - 10) <= self.nearestPredatorY <= (self.rect.centery + 10))):
+            predatorLeft = 1
+            #print("close left")
+        #in view right
+        elif ((self.rect.centerx <= self.nearestPredatorX <= (self.rect.centerx + 20)) and ((self.rect.centery - 10) <= self.nearestPredatorY <= (self.rect.centery + 10))):
+            predatorRight = 1
+            #print("close right")
+        
         if (self.direction == UP):
             A = (0, -1)
             distanceFromCreatureForward = distanceFromTop
@@ -128,9 +129,9 @@ class Herbivore(Creature.Creature):
             foodForward = self.upFood
             foodLeft = self.leftFood
             foodRight = self.rightFood
-            predatorDistanceForward = predatorUp
-            predatorDistanceLeft = predatorLeft
-            predatorDistanceRight = predatorRight
+            predatorRelativeForward = predatorUp
+            predatorRelativeLeft = predatorLeft
+            predatorRelativeRight = predatorRight
         elif (self.direction == DOWN):
             A = (0, 1)
             distanceFromCreatureForward = distanceFromBottom
@@ -139,9 +140,9 @@ class Herbivore(Creature.Creature):
             foodForward = self.downFood
             foodLeft = self.rightFood
             foodRight = self.leftFood
-            predatorDistanceForward = predatorDown
-            predatorDistanceLeft = predatorRight
-            predatorDistanceRight = predatorLeft
+            predatorRelativeForward = predatorDown
+            predatorRelativeLeft = predatorRight
+            predatorRelativeRight = predatorLeft
         elif (self.direction == LEFT):
             A = (-1, 0)
             distanceFromCreatureForward = distanceFromLeft
@@ -150,9 +151,9 @@ class Herbivore(Creature.Creature):
             foodForward = self.leftFood
             foodLeft = self.downFood
             foodRight = self.upFood
-            predatorDistanceForward = predatorLeft
-            predatorDistanceLeft = predatorDown
-            predatorDistanceRight = predatorUp
+            predatorRelativeForward = predatorLeft
+            predatorRelativeLeft = predatorDown
+            predatorRelativeRight = predatorUp
         else:
             A = (1, 0)
             distanceFromCreatureForward = distanceFromRight
@@ -161,9 +162,9 @@ class Herbivore(Creature.Creature):
             foodForward = self.rightFood
             foodLeft = self.upFood
             foodRight = self.downFood
-            predatorDistanceForward = predatorRight
-            predatorDistanceLeft = predatorUp
-            predatorDistanceRight = predatorDown
+            predatorRelativeForward = predatorRight
+            predatorRelativeLeft = predatorUp
+            predatorRelativeRight = predatorDown
 
         B = Creature.Creature.getVectors(self, self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY)
         
@@ -175,16 +176,16 @@ class Herbivore(Creature.Creature):
         angleToPredator = Creature.Creature.angleBetween(self, A, B)
         angleToPredator = Creature.Creature.adjustAngle(self, angleToPredator)
 
-        return [self.nearestFoodDistance,
-                angleToFood,
-                foodForward,
-                foodLeft,
-                foodRight,
-                self.nearestPredatorDistance,
-                angleToPredator, 
-                predatorDistanceForward,
-                predatorDistanceLeft,
-                predatorDistanceRight,
-                distanceFromCreatureForward,
-                distanceFromCreatureLeft,
-                distanceFromCreatureRight]
+        return [self.nearestFoodDistance,       #distance in pixels to the nearest piece of food
+                angleToFood,                    #angle in degrees to the nearest piece of food relative to the creature
+                foodForward,                    #amount of food in front of the creature
+                foodLeft,                       #amount of food to the left of the creature
+                foodRight,                      #amount of food to the right of the creature
+                self.nearestPredatorDistance,   #distance in pixels to the nearest predator
+                angleToPredator,                #angle in degrees to the nearest predator relative to the creature
+                predatorRelativeForward,        #is there a predator in front
+                predatorRelativeLeft,           #is there a predator to the left
+                predatorRelativeRight,          #is there a predator to the right
+                distanceFromCreatureForward,    #distance from the wall forward
+                distanceFromCreatureLeft,       #distance from the wall left
+                distanceFromCreatureRight]      #distance from the wall right

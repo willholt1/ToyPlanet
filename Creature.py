@@ -23,7 +23,7 @@ class Creature(pygame.sprite.Sprite):
         self.image = self.originalImage
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        
+        self.training = False
         #creature attributes
         self.speed = speed
         self.viewDistance = 250
@@ -65,7 +65,7 @@ class Creature(pygame.sprite.Sprite):
             self.distanceTravelled += 1
         else:
             #decrease fitness if move is invalid
-            self.fitness -= 20
+            self.fitness -= 50
             self.alive = False
 
     def turnLeft(self):
