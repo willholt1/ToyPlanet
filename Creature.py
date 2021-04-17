@@ -65,7 +65,7 @@ class Creature(pygame.sprite.Sprite):
             self.distanceTravelled += 1
         else:
             #decrease fitness if move is invalid
-            self.fitness -= 50
+            self.fitness -= 10
             self.alive = False
 
     def turnLeft(self):

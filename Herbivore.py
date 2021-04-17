@@ -49,6 +49,8 @@ class Herbivore(Creature.Creature):
 
             self.energy -= 1
         else:
+            self.rect.centerx = 0
+            self.rect.centery = 0
             self.alive = False
 
         return foodList
@@ -87,8 +89,8 @@ class Herbivore(Creature.Creature):
         #if no food was in view set center as closest food
         if (self.predatorsInView == 0):
             self.nearestPredatorDistance = self.getDistance(self.rect.centerx, self.rect.centery, 0, 0)
-            self.nearestPredatorX = 500
-            self.nearestPredatorY = 500
+            self.nearestPredatorX = 0
+            self.nearestPredatorY = 0
 
     #Override
     #data to be passed to the NN
@@ -98,28 +100,31 @@ class Herbivore(Creature.Creature):
         distanceFromLeft = self.rect.centerx
         distanceFromRight = (1000 - self.rect.centerx)
 
-        predatorUp = 0
-        predatorDown = 0
-        predatorLeft = 0
-        predatorRight = 0
+        predatorUp = self.viewDistance
+        predatorDown = self.viewDistance
+        predatorLeft = self.viewDistance
+        predatorRight = self.viewDistance
 
-        
         #in view up
-        if (((self.rect.centery - 20) <= self.nearestPredatorY <= self.rect.centery) and ((self.rect.centerx - 10) <= self.nearestPredatorX <= (self.rect.centerx + 10))):
-            predatorUp = 1
-            #print("close up")
+        if (((self.rect.centery - self.viewDistance) <= self.nearestPredatorY <= self.rect.centery) and ((self.rect.centerx - 10) <= self.nearestPredatorX <= (self.rect.centerx + 10))):
+            predatorUp = self.rect.centery - self.nearestPredatorY
+            if (predatorUp < 0):
+                predatorUp = predatorUp * -1
         #in view down
-        elif ((self.rect.centery <= self.nearestPredatorY <= (self.rect.centery + 20)) and ((self.rect.centerx - 10) <= self.nearestPredatorX <= (self.rect.centerx + 10))):
-            predatorDown = 1
-            #print("close down")
+        elif ((self.rect.centery <= self.nearestPredatorY <= (self.rect.centery + self.viewDistance)) and ((self.rect.centerx - 10) <= self.nearestPredatorX <= (self.rect.centerx + 10))):
+            predatorDown = self.rect.centery - self.nearestPredatorY
+            if (predatorDown < 0):
+                predatorDown = predatorDown * -1
         #in view left
-        elif (((self.rect.centerx - 20) <= self.nearestPredatorX <= self.rect.centerx) and ((self.rect.centery - 10) <= self.nearestPredatorY <= (self.rect.centery + 10))):
-            predatorLeft = 1
-            #print("close left")
+        elif (((self.rect.centerx - self.viewDistance) <= self.nearestPredatorX <= self.rect.centerx) and ((self.rect.centery - 10) <= self.nearestPredatorY <= (self.rect.centery + 10))):
+            predatorLeft = self.rect.centerx - self.nearestPredatorX
+            if (predatorLeft < 0):
+                predatorLeft = predatorLeft * -1
         #in view right
-        elif ((self.rect.centerx <= self.nearestPredatorX <= (self.rect.centerx + 20)) and ((self.rect.centery - 10) <= self.nearestPredatorY <= (self.rect.centery + 10))):
-            predatorRight = 1
-            #print("close right")
+        elif ((self.rect.centerx <= self.nearestPredatorX <= (self.rect.centerx + self.viewDistance)) and ((self.rect.centery - 10) <= self.nearestPredatorY <= (self.rect.centery + 10))):
+            predatorRight = self.rect.centerx - self.nearestPredatorX
+            if (predatorRight < 0):
+                predatorRight = predatorRight * -1
         
         if (self.direction == UP):
             A = (0, -1)

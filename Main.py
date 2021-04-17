@@ -119,7 +119,7 @@ def trainHerbivore(genomes, config):
     predatorNet = neat.nn.FeedForwardNetwork.create(predatorGenome, predatorConfig)
     '''
 
-    for i in range(30):
+    for i in range(15):
         x = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
         y = random.randint(SPAWNBORDER, (WORLDSIZE - SPAWNBORDER))
         predator = Predator.Predator('sprites/creature_red.png', x, y, 1)
@@ -141,7 +141,7 @@ def trainHerbivore(genomes, config):
 
     
     foodList = []
-    for i in range(35):
+    for i in range(30):
         foodList = trainReplenishFood(foodList)
 
     lastFoodLen = len(foodList)
@@ -167,6 +167,11 @@ def trainHerbivore(genomes, config):
                 genomes[i][1].fitness = herbivore.fitness
                 aliveCreatues += 1
 
+                if (len(foodList)< lastFoodLen):
+                    foodList = trainReplenishFood(foodList)
+        
+                lastFoodLen = len(foodList)
+
         if (aliveCreatues == 0):
             running = False
 
@@ -176,10 +181,7 @@ def trainHerbivore(genomes, config):
             decision = 5
             herbivores = predator.update(herbivores, decision)
 
-        if (len(foodList)< lastFoodLen):
-            foodList = trainReplenishFood(foodList)
         
-        lastFoodLen = len(foodList)
 
         allSprites.add(predators, herbivores, foodList)
         #Draw
