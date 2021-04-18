@@ -19,7 +19,6 @@ TURNRIGHT = 3
 class Predator(Creature.Creature):
     def __init__(self, image, x, y, speed):
         super().__init__(image, x, y, speed)
-        self.energy = 10000
 
     #Override
     def update(self, foodList, action):
@@ -38,8 +37,6 @@ class Predator(Creature.Creature):
             foodList = self.checkEat(foodList)
             self.energy -= 1
         else:
-            if (self.foodEaten == 0):
-                self.fitness -= 10
             self.alive = False
 
         return foodList

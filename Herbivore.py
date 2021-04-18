@@ -49,6 +49,8 @@ class Herbivore(Creature.Creature):
 
             self.energy -= 1
         else:
+            if (self.foodEaten == 0):
+                self.fitness -= 10
             self.rect.centerx = 0
             self.rect.centery = 0
             self.alive = False
