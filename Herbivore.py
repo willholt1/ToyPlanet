@@ -62,16 +62,16 @@ class Herbivore(Creature.Creature):
 
             if (distance < self.viewDistance):
                 self.predatorsInView += 1
-                '''
+                
                 if (predator.rect.centery < self.rect.centery):
                     self.upPredator += 1
-                elif (predator.rect.centery > self.rect.centery):
+                if (predator.rect.centery > self.rect.centery):
                     self.downPredator += 1
-                elif (predator.rect.centerx < self.rect.centerx):
+                if (predator.rect.centerx < self.rect.centerx):
                     self.leftPredator += 1
-                else:
+                if (predator.rect.centerx > self.rect.centerx):
                     self.rightPredator +=1
-                '''
+                
 
                 if (distance < self.nearestPredatorDistance):
                     self.nearestPredatorDistance = distance
@@ -129,6 +129,9 @@ class Herbivore(Creature.Creature):
             predatorRelativeForward = predatorUp
             predatorRelativeLeft = predatorLeft
             predatorRelativeRight = predatorRight
+            predatorCountForward = self.upPredator
+            predatorCountLeft = self.leftPredator
+            predatorCountRight = self.rightPredator
         elif (self.direction == constants.DOWN):
             A = (0, 1)
             distanceFromCreatureForward = distanceFromBottom
@@ -140,6 +143,9 @@ class Herbivore(Creature.Creature):
             predatorRelativeForward = predatorDown
             predatorRelativeLeft = predatorRight
             predatorRelativeRight = predatorLeft
+            predatorCountForward = self.downPredator
+            predatorCountLeft = self.rightPredator
+            predatorCountRight = self.leftPredator
         elif (self.direction == constants.LEFT):
             A = (-1, 0)
             distanceFromCreatureForward = distanceFromLeft
@@ -151,6 +157,9 @@ class Herbivore(Creature.Creature):
             predatorRelativeForward = predatorLeft
             predatorRelativeLeft = predatorDown
             predatorRelativeRight = predatorUp
+            predatorCountForward = self.leftPredator
+            predatorCountLeft = self.downPredator
+            predatorCountRight = self.upPredator
         else:
             A = (1, 0)
             distanceFromCreatureForward = distanceFromRight
@@ -162,6 +171,9 @@ class Herbivore(Creature.Creature):
             predatorRelativeForward = predatorRight
             predatorRelativeLeft = predatorUp
             predatorRelativeRight = predatorDown
+            predatorCountForward = self.rightPredator
+            predatorCountLeft = self.upPredator
+            predatorCountRight = self.downPredator
 
         B = Creature.Creature.getVectors(self, self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY)
         
@@ -183,6 +195,9 @@ class Herbivore(Creature.Creature):
                 predatorRelativeForward,        #is there a predator in front
                 predatorRelativeLeft,           #is there a predator to the left
                 predatorRelativeRight,          #is there a predator to the right
+                predatorCountForward,           #number of predators in front
+                predatorCountLeft,              #number of predators to the left
+                predatorCountRight,              #number of predators to the right
                 distanceFromCreatureForward,    #distance from the wall forward
                 distanceFromCreatureLeft,       #distance from the wall left
                 distanceFromCreatureRight]      #distance from the wall right

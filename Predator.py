@@ -27,6 +27,10 @@ class Predator(Creature.Creature):
             foodList = self.checkEat(foodList)
             self.energy -= 1
         else:
+            if (self.foodEaten == 0):
+                self.fitness -= 10
+            self.rect.centerx = 0
+            self.rect.centery = 0
             self.alive = False
 
         return foodList
@@ -80,5 +84,5 @@ class Predator(Creature.Creature):
                     food.alive = False
                 else:
                     foodList.remove(food)
-                break
+                    break
         return foodList

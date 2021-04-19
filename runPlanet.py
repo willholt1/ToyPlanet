@@ -39,7 +39,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         predators.append(animat)
 
     foodList = []
-    for i in range(constants.POPULATION * constants.FOODMULTIPLIER):
+    for i in range(constants.POPULATION):
         foodList = runReplenishFood(foodList)
 
     ###########
