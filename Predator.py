@@ -4,17 +4,7 @@ import random
 import math
 import numpy as np
 import pygame
-
-UP = 0
-DOWN = 180
-LEFT = 90
-RIGHT = 270
-
-WORLDSIZE = 1000
-
-MOVE = 1
-TURNLEFT = 2
-TURNRIGHT = 3
+import constants
 
 class Predator(Creature.Creature):
     def __init__(self, image, x, y, speed):
@@ -24,12 +14,12 @@ class Predator(Creature.Creature):
     def update(self, foodList, action):
         if (self.energy > 0):
             #perform action determined by the NN
-            if (action == MOVE):
+            if (action == constants.MOVE):
                 Creature.Creature.move(self)
-            elif (action == TURNLEFT):
+            elif (action == constants.TURNLEFT):
                 Creature.Creature.turnLeft(self)
                 Creature.Creature.move(self)
-            elif (action == TURNRIGHT):
+            elif (action == constants.TURNRIGHT):
                 Creature.Creature.turnRight(self)
                 Creature.Creature.move(self)
 
@@ -51,7 +41,7 @@ class Predator(Creature.Creature):
         self.rightFood = 0
         #loop through all the food
         for food in foodList:
-            distance = WORLDSIZE
+            distance = constants.WORLDSIZE
             
             distance = self.getDistance(self.rect.centerx, self.rect.centery, food.rect.centerx, food.rect.centery)
 
@@ -74,8 +64,8 @@ class Predator(Creature.Creature):
         #if no food was in view set center as closest food
         if (self.foodInView == 0):
             self.nearestFoodDistance = self.getDistance(self.rect.centerx, self.rect.centery, 500, 500)
-            self.nearestFoodX = WORLDSIZE/2
-            self.nearestFoodY = WORLDSIZE/2
+            self.nearestFoodX = constants.WORLDSIZE/2
+            self.nearestFoodY = constants.WORLDSIZE/2
 
     #Override
     #check if food is touching creature, if it is, eat

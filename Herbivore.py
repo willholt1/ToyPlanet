@@ -1,20 +1,10 @@
 import Food
 import Creature
+import constants
 import random
 import math
 import numpy as np
 import pygame
-
-UP = 0
-DOWN = 180
-LEFT = 90
-RIGHT = 270
-
-WORLDSIZE = 1000
-
-MOVE = 1
-TURNLEFT = 2
-TURNRIGHT = 3
 
 class Herbivore(Creature.Creature):
     def __init__(self, image, x, y, speed):
@@ -34,12 +24,12 @@ class Herbivore(Creature.Creature):
     def update(self, foodList, predators, action):
         if (self.energy > 0):
             #perform action determined by the NN
-            if (action == MOVE):
+            if (action == constants.MOVE):
                 Creature.Creature.move(self)
-            elif (action == TURNLEFT):
+            elif (action == constants.TURNLEFT):
                 Creature.Creature.turnLeft(self)
                 Creature.Creature.move(self)
-            elif (action == TURNRIGHT):
+            elif (action == constants.TURNRIGHT):
                 Creature.Creature.turnRight(self)
                 Creature.Creature.move(self)
 
@@ -67,7 +57,7 @@ class Herbivore(Creature.Creature):
 
         #loop through all the predators
         for predator in predators:
-            distance = WORLDSIZE
+            distance = constants.WORLDSIZE
             distance = self.getDistance(self.rect.centerx, self.rect.centery, predator.rect.centerx, predator.rect.centery)
 
             if (distance < self.viewDistance):
@@ -128,7 +118,7 @@ class Herbivore(Creature.Creature):
             if (predatorRight < 0):
                 predatorRight = predatorRight * -1
         
-        if (self.direction == UP):
+        if (self.direction == constants.UP):
             A = (0, -1)
             distanceFromCreatureForward = distanceFromTop
             distanceFromCreatureLeft = distanceFromLeft
@@ -139,7 +129,7 @@ class Herbivore(Creature.Creature):
             predatorRelativeForward = predatorUp
             predatorRelativeLeft = predatorLeft
             predatorRelativeRight = predatorRight
-        elif (self.direction == DOWN):
+        elif (self.direction == constants.DOWN):
             A = (0, 1)
             distanceFromCreatureForward = distanceFromBottom
             distanceFromCreatureLeft = distanceFromRight
@@ -150,7 +140,7 @@ class Herbivore(Creature.Creature):
             predatorRelativeForward = predatorDown
             predatorRelativeLeft = predatorRight
             predatorRelativeRight = predatorLeft
-        elif (self.direction == LEFT):
+        elif (self.direction == constants.LEFT):
             A = (-1, 0)
             distanceFromCreatureForward = distanceFromLeft
             distanceFromCreatureLeft = distanceFromBottom
