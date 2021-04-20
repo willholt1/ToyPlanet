@@ -55,13 +55,12 @@ def trainPredator(genomes, config):
         #Update
         allSprites.empty()
         aliveCreatues = 0
-        for i, predator in enumerate(predators):
-            output = nets[i].activate(predator.getData())
-            decision = output.index(max(output)) + 1
-            foodList = predator.update(foodList, decision)
-            genomes[i][1].fitness = predator.fitness
-            
+        for i, predator in enumerate(predators):  
             if (predator.alive):
+                output = nets[i].activate(predator.getData())
+                decision = output.index(max(output)) + 1
+                foodList = predator.update(foodList, decision)
+                genomes[i][1].fitness = predator.fitness
                 aliveCreatues += 1
 
         if (aliveCreatues == 0):

@@ -55,7 +55,9 @@ class Creature(pygame.sprite.Sprite):
         else:
             #decrease fitness if move is invalid
             self.fitness -= 10
+            self.energy = 0
             self.alive = False
+            
 
     def turnLeft(self):
         if (self.direction == constants.UP):
@@ -122,12 +124,13 @@ class Creature(pygame.sprite.Sprite):
                 self.foodInView += 1
                 if (food.rect.centery < self.rect.centery):
                     self.upFood += 1
-                elif (food.rect.centery > self.rect.centery):
+                if (food.rect.centery > self.rect.centery):
                     self.downFood += 1
-                elif (food.rect.centerx < self.rect.centerx):
+                if (food.rect.centerx < self.rect.centerx):
                     self.leftFood += 1
-                else:
+                if (food.rect.centerx > self.rect.centery):
                     self.rightFood +=1
+
                 #if the food is within view 
                 if (distance < self.nearestFoodDistance):        
                     self.nearestFoodDistance = distance    
@@ -158,6 +161,7 @@ class Creature(pygame.sprite.Sprite):
     def adjustAngle(self, angle):
         if angle > 180:
             angle = 360 - angle
+        else:
             angle = angle * -1
         return angle
 

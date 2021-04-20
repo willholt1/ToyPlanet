@@ -18,7 +18,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
     #init NEAT
     herbivores = []
     predators = []
-
+    constants.HTRAINPREDATORMOVE = True
     allSprites = pygame.sprite.Group()
 
     herbivoreNet = neat.nn.FeedForwardNetwork.create(herbivoreGenome, herbivoreConfig)

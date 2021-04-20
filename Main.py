@@ -215,7 +215,7 @@ def menu():
                     constants.FOODENERGY -= 10
         if (trainPredatorButton.rect.collidepoint((mx, my))):
             if (click):
-                configPath = './neat-config-predators.txt'
+                configPath = 'NEAT_configs/neat-config-predators.txt'
                 config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPath)
                 p = neat.Population(config)
 
@@ -228,12 +228,12 @@ def menu():
                 #run neat
                 winner = p.run(trainPredator.trainPredator, constants.PTRAINGENERATIONS)
                 #save winner
-                with open("predator.pkl", "wb") as f:
+                with open("savedNNs/predator.pkl", "wb") as f:
                     pickle.dump(winner, f)
                     f.close()
         if (trainHerbivoreButton.rect.collidepoint((mx, my))):
             if (click):
-                configPath = './neat-config-herbivores.txt'
+                configPath = 'NEAT_configs/neat-config-herbivores.txt'
                 config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPath)
 
                 p = neat.Population(config)
@@ -246,25 +246,25 @@ def menu():
                 #run neat
                 winner = p.run(trainHerbivore.trainHerbivore, constants.HTRAINGENERATIONS)
                 #save winner
-                with open("herbivore.pkl", "wb") as f:
+                with open("savedNNs/herbivore.pkl", "wb") as f:
                     pickle.dump(winner, f)
                     f.close()
         if (runPlanetButton.rect.collidepoint((mx, my))):
             if (click):
                 print('Running Simulation...')
-                configPathHerbivore = './neat-config-herbivores.txt'
-                configPathPredator = './neat-config-predators.txt'
+                configPathHerbivore = 'NEAT_configs/neat-config-herbivores.txt'
+                configPathPredator = 'NEAT_configs/neat-config-predators.txt'
 
                 herbivoreConfig = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPathHerbivore)
                 predatorConfig = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPathPredator)
 
                 # load herbivore
-                with open("herbivore.pkl", "rb") as f:
+                with open("savedNNs/herbivore.pkl", "rb") as f:
                     herbivoreGenome = pickle.load(f)
                     f.close()
 
                 # load predator
-                with open("predator.pkl", "rb") as f:
+                with open("savedNNs/predator.pkl", "rb") as f:
                     predatorGenome = pickle.load(f)
                     f.close()
 
@@ -362,6 +362,7 @@ def menu():
         pygame.draw.line(screen, (0,0,0), (0, 525), (1000, 525), 3)
         pygame.draw.line(screen, (0,0,0), (0, 675), (300, 675), 3)
         pygame.draw.line(screen, (0,0,0), (300, 1000), (300, 675), 3)
+
         pygame.display.flip()
         #keep program running at set FPS
         clock.tick(constants.FPS)

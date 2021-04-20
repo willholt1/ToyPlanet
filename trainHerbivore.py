@@ -24,10 +24,10 @@ def trainHerbivore(genomes, config):
     allSprites = pygame.sprite.Group()
     
     if (constants.HTRAINPREDATORMOVE):
-        configPathPredator = './neat-config-predators.txt'
+        configPathPredator = 'NEAT_configs/neat-config-predators.txt'
         predatorConfig = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPathPredator)
         # load predator genome
-        with open("predator.pkl", "rb") as f:
+        with open("savedNNs/predator.pkl", "rb") as f:
             predatorGenome = pickle.load(f)
             f.close()
         #create predator brain

@@ -12,27 +12,29 @@ class Predator(Creature.Creature):
 
     #Override
     def update(self, foodList, action):
-        if (self.energy > 0):
-            #perform action determined by the NN
-            if (action == constants.MOVE):
-                Creature.Creature.move(self)
-            elif (action == constants.TURNLEFT):
-                Creature.Creature.turnLeft(self)
-                Creature.Creature.move(self)
-            elif (action == constants.TURNRIGHT):
-                Creature.Creature.turnRight(self)
-                Creature.Creature.move(self)
+        if (constants.HTRAINPREDATORMOVE == True):
+            if (self.energy > 0):
+                #perform action determined by the NN
+                if (action == constants.MOVE):
+                    Creature.Creature.move(self)
+                elif (action == constants.TURNLEFT):
+                    Creature.Creature.turnLeft(self)
+                    Creature.Creature.move(self)
+                elif (action == constants.TURNRIGHT):
+                    Creature.Creature.turnRight(self)
+                    Creature.Creature.move(self)
 
-            self.look(foodList)
-            foodList = self.checkEat(foodList)
-            self.energy -= 1
+                self.look(foodList)
+                foodList = self.checkEat(foodList)
+                self.energy -= 1
+            else:
+                if (self.foodEaten == 0):
+                    self.fitness -= 10
+                self.rect.centerx = 0
+                self.rect.centery = 0
+                self.alive = False
         else:
-            if (self.foodEaten == 0):
-                self.fitness -= 10
-            self.rect.centerx = 0
-            self.rect.centery = 0
-            self.alive = False
-
+            foodList = self.checkEat(foodList)
         return foodList
 
     #sets the coordinates of the closest piece of food within view
@@ -81,6 +83,7 @@ class Predator(Creature.Creature):
                     food.fitness -= 10
                     food.rect.centerx = 0
                     food.rect.centery = 0
+                    food.energy = 0
                     food.alive = False
                 else:
                     foodList.remove(food)
