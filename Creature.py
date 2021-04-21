@@ -6,7 +6,7 @@ import numpy as np
 import pygame
 
 class Creature(pygame.sprite.Sprite):
-    def __init__(self, image, x, y, speed):
+    def __init__(self, image, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.originalImage = pygame.image.load(image).convert_alpha()
         self.image = self.originalImage
@@ -14,7 +14,7 @@ class Creature(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         self.training = False
         #creature attributes
-        self.speed = speed
+        self.speed = 1
         self.viewDistance = 250
 
         #status variables

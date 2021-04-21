@@ -29,14 +29,14 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
     #create herbivores
     for i in range(round(constants.POPULATION * 0.9)):
         x, y = randomXY()
-        animat = Herbivore.Herbivore('sprites/creature_blue.png', x, y, 2)
+        animat = Herbivore.Herbivore('sprites/creature_blue.png', x, y)
             
         herbivores.append(animat)
     
     #create predators
     for i in range(round(constants.POPULATION * 0.1)):
         x, y = randomXY()
-        animat = Predator.Predator('sprites/creature_red.png', x, y, 1)
+        animat = Predator.Predator('sprites/creature_red.png', x, y)
             
         predators.append(animat)
 
@@ -77,7 +77,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
             if (herbivore.energy > constants.HREPRODUCTIONTHRESHOLD):
                 x = herbivore.rect.centerx
                 y = herbivore.rect.centery
-                animat = Herbivore.Herbivore('sprites/egg_blue.png', x, y, 2)
+                animat = Herbivore.Herbivore('sprites/egg_blue.png', x, y)
                 herbivores.append(animat)
                 herbivore.energy = herbivore.energy / 2
                 herbivore.children += 1
@@ -98,7 +98,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
             if (predator.energy > constants.PREPRODUCTIONTHRESHOLD):
                 x = herbivore.rect.centerx
                 y = herbivore.rect.centery
-                animat = Predator.Predator('sprites/egg_pink.png', x, y, 1)
+                animat = Predator.Predator('sprites/egg_pink.png', x, y)
                 predators.append(animat)
                 predator.energy = predator.energy / 2
                 predator.children += 1

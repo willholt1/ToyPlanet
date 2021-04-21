@@ -36,7 +36,7 @@ def trainHerbivore(genomes, config):
 
     for i in range(constants.HTRAINPREDATORCOUNT):
         x, y = randomXY()
-        predator = Predator.Predator('sprites/creature_red.png', x, y, 1)
+        predator = Predator.Predator('sprites/creature_red.png', x, y)
         predator.viewDistance = 1500
         predators.append(predator)
 
@@ -48,7 +48,7 @@ def trainHerbivore(genomes, config):
 
         x = 500
         y = 500
-        animat = Herbivore.Herbivore('sprites/creature_blue.png', x, y, 2)
+        animat = Herbivore.Herbivore('sprites/creature_blue.png', x, y)
         animat.training = True
             
         herbivores.append(animat)

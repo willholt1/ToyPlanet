@@ -7,8 +7,10 @@ import numpy as np
 import pygame
 
 class Herbivore(Creature.Creature):
-    def __init__(self, image, x, y, speed):
-        super().__init__(image, x, y, speed)
+    def __init__(self, image, x, y):
+        super().__init__(image, x, y)
+
+        self.speed = 2
 
         self.nearestPredatorDistance = 1000
         self.nearestPredatorX = 0

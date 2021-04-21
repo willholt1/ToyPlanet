@@ -28,7 +28,7 @@ def trainPredator(genomes, config):
 
         x = 500
         y = 500
-        predator = Predator.Predator('sprites/creature_red.png', x, y, 1)
+        predator = Predator.Predator('sprites/creature_red.png', x, y)
         predator.training = True
             
         predators.append(predator)

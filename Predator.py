@@ -7,14 +7,15 @@ import pygame
 import constants
 
 class Predator(Creature.Creature):
-    def __init__(self, image, x, y, speed):
-        super().__init__(image, x, y, speed)
+    def __init__(self, image, x, y):
+        super().__init__(image, x, y)
+        self.speed = 1
 
     #Override
     def update(self, foodList, action):
-        if (self.sleepCounter < 150):
+        if (self.sleepCounter < 500):
             self.sleepCounter += 1
-            if (self.sleepCounter == 150):
+            if (self.sleepCounter == 500):
                     self.originalImage = pygame.image.load('sprites/creature_red.png').convert_alpha()
                     self.image = self.originalImage
         else:
