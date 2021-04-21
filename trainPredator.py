@@ -18,7 +18,7 @@ def trainPredator(genomes, config):
     #init NEAT
     nets = []
     predators = []
-    
+    constants.HTRAINPREDATORMOVE = True
     allSprites = pygame.sprite.Group()
 
     for id, genome in genomes:

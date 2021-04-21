@@ -22,6 +22,7 @@ class Creature(pygame.sprite.Sprite):
         self.energy = 800
         self.alive = True
         self.fitness = 0
+        self.sleepCounter = 0
 
         #creature memory
         self.nearestFoodX = constants.WORLDSIZE/2

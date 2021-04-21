@@ -13,6 +13,8 @@ screen = pygame.display.set_mode((constants.WORLDSIZE, constants.WORLDSIZE))
 pygame.display.set_caption('Toy Planet')
 clock = pygame.time.Clock()
 
+font = pygame.font.SysFont('timesnewroman', 14)
+
 def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         
     #init NEAT
@@ -68,14 +70,14 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
             if (herbivore.alive):
                 aliveCreatues += 1
             else:
-                print(herbivore.fitness)
+                #print(herbivore.fitness)
                 herbivores.remove(herbivore)
 
             #reproduce
             if (herbivore.energy > constants.HREPRODUCTIONTHRESHOLD):
-                x = herbivore.rect.centerx + 20
-                y = herbivore.rect.centery + 20
-                animat = Herbivore.Herbivore('sprites/creature_blue.png', x, y, 2)
+                x = herbivore.rect.centerx
+                y = herbivore.rect.centery
+                animat = Herbivore.Herbivore('sprites/egg_blue.png', x, y, 2)
                 herbivores.append(animat)
                 herbivore.energy = herbivore.energy / 2
                 herbivore.children += 1
@@ -94,9 +96,9 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
             #reproduce
             
             if (predator.energy > constants.PREPRODUCTIONTHRESHOLD):
-                x = herbivore.rect.centerx + 20
-                y = herbivore.rect.centery + 20
-                animat = Predator.Predator('sprites/creature_red.png', x, y, 1)
+                x = herbivore.rect.centerx
+                y = herbivore.rect.centery
+                animat = Predator.Predator('sprites/egg_pink.png', x, y, 1)
                 predators.append(animat)
                 predator.energy = predator.energy / 2
                 predator.children += 1
@@ -114,6 +116,19 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         #Draw
         screen.fill((245, 222, 179))
         allSprites.draw(screen)
+
+        foodCount = 'Food count: '+str(len(foodList))
+        img = font.render(foodCount, True, (0,0,0))
+        screen.blit(img, (10, 930))
+
+        hPop = 'H population: '+str(len(herbivores))
+        img = font.render(hPop, True, (0,0,0))
+        screen.blit(img, (10, 950))
+
+        pPop = 'P population: '+str(len(predators))
+        img = font.render(pPop, True, (0,0,0))
+        screen.blit(img, (10, 970))
+
         pygame.display.flip()
 
         #keep program running at set FPS

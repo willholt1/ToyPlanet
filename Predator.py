@@ -12,29 +12,35 @@ class Predator(Creature.Creature):
 
     #Override
     def update(self, foodList, action):
-        if (constants.HTRAINPREDATORMOVE == True):
-            if (self.energy > 0):
-                #perform action determined by the NN
-                if (action == constants.MOVE):
-                    Creature.Creature.move(self)
-                elif (action == constants.TURNLEFT):
-                    Creature.Creature.turnLeft(self)
-                    Creature.Creature.move(self)
-                elif (action == constants.TURNRIGHT):
-                    Creature.Creature.turnRight(self)
-                    Creature.Creature.move(self)
-
-                self.look(foodList)
-                foodList = self.checkEat(foodList)
-                self.energy -= 1
-            else:
-                if (self.foodEaten == 0):
-                    self.fitness -= 10
-                self.rect.centerx = 0
-                self.rect.centery = 0
-                self.alive = False
+        if (self.sleepCounter < 150):
+            self.sleepCounter += 1
+            if (self.sleepCounter == 150):
+                    self.originalImage = pygame.image.load('sprites/creature_red.png').convert_alpha()
+                    self.image = self.originalImage
         else:
-            foodList = self.checkEat(foodList)
+            if (constants.HTRAINPREDATORMOVE == True):
+                if (self.energy > 0):
+                    #perform action determined by the NN
+                    if (action == constants.MOVE):
+                        Creature.Creature.move(self)
+                    elif (action == constants.TURNLEFT):
+                        Creature.Creature.turnLeft(self)
+                        Creature.Creature.move(self)
+                    elif (action == constants.TURNRIGHT):
+                        Creature.Creature.turnRight(self)
+                        Creature.Creature.move(self)
+
+                    self.look(foodList)
+                    foodList = self.checkEat(foodList)
+                    self.energy -= 1
+                else:
+                    if (self.foodEaten == 0):
+                        self.fitness -= 10
+                    self.rect.centerx = 0
+                    self.rect.centery = 0
+                    self.alive = False
+            else:
+                foodList = self.checkEat(foodList)
         return foodList
 
     #sets the coordinates of the closest piece of food within view

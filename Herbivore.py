@@ -27,21 +27,27 @@ class Herbivore(Creature.Creature):
     #Override
     def update(self, foodList, predators, action):
         if (self.energy > 0):
-            #perform action determined by the NN
-            if (action == constants.MOVE):
-                Creature.Creature.move(self)
-            elif (action == constants.TURNLEFT):
-                Creature.Creature.turnLeft(self)
-                Creature.Creature.move(self)
-            elif (action == constants.TURNRIGHT):
-                Creature.Creature.turnRight(self)
-                Creature.Creature.move(self)
+            if (self.sleepCounter < 150):
+                self.sleepCounter += 1
+                if (self.sleepCounter == 150):
+                    self.originalImage = pygame.image.load('sprites/creature_blue.png').convert_alpha()
+                    self.image = self.originalImage
+            else:
+                #perform action determined by the NN
+                if (action == constants.MOVE):
+                    Creature.Creature.move(self)
+                elif (action == constants.TURNLEFT):
+                    Creature.Creature.turnLeft(self)
+                    Creature.Creature.move(self)
+                elif (action == constants.TURNRIGHT):
+                    Creature.Creature.turnRight(self)
+                    Creature.Creature.move(self)
 
-            Creature.Creature.look(self, foodList)
-            self.lookPredators(predators)
-            foodList = Creature.Creature.checkEat(self, foodList)
+                Creature.Creature.look(self, foodList)
+                self.lookPredators(predators)
+                foodList = Creature.Creature.checkEat(self, foodList)
 
-            self.energy -= 1
+                self.energy -= 1
         else:
             if (self.foodEaten == 0):
                 self.fitness -= 10
@@ -76,30 +82,30 @@ class Herbivore(Creature.Creature):
                 angleToPredator = Creature.Creature.angleBetween(self, A, B)
                 angleToPredator = Creature.Creature.adjustAngle(self, angleToPredator)
                 
+                #up
                 if ((-5 <= angleToPredator <= 5) and (distance < self.nearestUpPredator)):
                     self.nearestUpPredator = distance
-                    #print("up")
+                #top right
                 elif ((40 <= angleToPredator <= 50) and (distance < self.nearestTopRightPredator)):
                     self.nearestTopRightPredator = distance
-                    #print("TR")
+                #right
                 elif ((85 <= angleToPredator <= 95) and (distance < self.nearestRightPredator)):
                     self.nearestRightPredator = distance
-                    #print("R")
+                #bottom right
                 elif ((130 <= angleToPredator <= 140) and (distance < self.nearestBottomRightPredator)):
                     self.nearestBottomRightPredator = distance
-                    #print("BR")
+                #top left
                 elif ((-50 <= angleToPredator <= -40) and (distance < self.nearestTopLeftPredator)):
                     self.nearestTopLeftPredator = distance
-                    #print("TL")
+                #left
                 elif ((-95 <= angleToPredator <= -85) and (distance < self.nearestLeftPredator)):
                     self.nearestLeftPredator = distance
-                    #print("L")
+                #bottom left
                 elif ((-140 <= angleToPredator <= -130) and (distance < self.nearestBottomLeftPredator)):
                     self.nearestBottomLeftPredator = distance
-                    #print("BL")
+                #bottom
                 elif (((angleToPredator < -175) or (angleToPredator > 175)) and (distance < self.nearestBottomPredator)):
                     self.nearestBottomPredator = distance
-                    #print("B")
 
                 if (distance < self.nearestPredatorDistance):
                     self.nearestPredatorDistance = distance
