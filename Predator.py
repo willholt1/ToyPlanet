@@ -1,5 +1,6 @@
 import Food
 import Creature
+import utility
 import random
 import math
 import numpy as np
@@ -13,9 +14,9 @@ class Predator(Creature.Creature):
 
     #Override
     def update(self, foodList, action):
-        if (self.sleepCounter < 500):
+        if (self.sleepCounter < self.sleepTime):
             self.sleepCounter += 1
-            if (self.sleepCounter == 500):
+            if (self.sleepCounter == self.sleepTime):
                     self.originalImage = pygame.image.load('sprites/creature_red.png').convert_alpha()
                     self.image = self.originalImage
         else:
@@ -33,7 +34,7 @@ class Predator(Creature.Creature):
 
                     self.look(foodList)
                     foodList = self.checkEat(foodList)
-                    self.energy -= 1
+                    self.energy -= self.metabolism
                 else:
                     if (self.foodEaten == 0):
                         self.fitness -= 10
@@ -44,6 +45,7 @@ class Predator(Creature.Creature):
                 foodList = self.checkEat(foodList)
         return foodList
 
+    #override
     #sets the coordinates of the closest piece of food within view
     def look(self, foodList):
         self.nearestFoodDistance = self.viewDistance
@@ -56,7 +58,7 @@ class Predator(Creature.Creature):
         for food in foodList:
             distance = constants.WORLDSIZE
             
-            distance = self.getDistance(self.rect.centerx, self.rect.centery, food.rect.centerx, food.rect.centery)
+            distance = utility.getDistance(self.rect.centerx, self.rect.centery, food.rect.centerx, food.rect.centery)
 
             if (distance < self.viewDistance and food.alive):
                 self.foodInView += 1
@@ -76,7 +78,7 @@ class Predator(Creature.Creature):
                     
         #if no food was in view set center as closest food
         if (self.foodInView == 0):
-            self.nearestFoodDistance = self.getDistance(self.rect.centerx, self.rect.centery, 500, 500)
+            self.nearestFoodDistance = utility.getDistance(self.rect.centerx, self.rect.centery, 500, 500)
             self.nearestFoodX = constants.WORLDSIZE/2
             self.nearestFoodY = constants.WORLDSIZE/2
 
@@ -93,6 +95,7 @@ class Predator(Creature.Creature):
                     food.energy = 0
                     food.alive = False
                 else:
+                    #if the predator is training and therefore eating plants
                     foodList.remove(food)
                     break
         return foodList

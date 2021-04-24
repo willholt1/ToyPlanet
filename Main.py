@@ -68,7 +68,6 @@ def menu():
     foodEnergyPlus = MenuButton.MenuButton('sprites/plus_button.png', 225, 900)
     foodEnergyMinus = MenuButton.MenuButton('sprites/minus_button.png', 100, 900)
 
-
     buttons.add(trainPredatorButton,
                 trainHerbivoreButton,
                 runPlanetButton,

@@ -1,5 +1,6 @@
 import Food
 import constants
+import utility
 import random
 import math
 import numpy as np
@@ -15,7 +16,10 @@ class Creature(pygame.sprite.Sprite):
         self.training = False
         #creature attributes
         self.speed = 1
+        #inheritable attributes
         self.viewDistance = 250
+        self.sleepTime = 150
+        self.metabolism = 6
 
         #status variables
         self.direction = constants.UP
@@ -37,7 +41,6 @@ class Creature(pygame.sprite.Sprite):
         #performance stats
         self.distanceTravelled = 0
         self.foodEaten = 0 
-        self.freeMoves = 0
         self.children = 0
 
     def move(self):
@@ -58,7 +61,6 @@ class Creature(pygame.sprite.Sprite):
             self.fitness -= 10
             self.energy = 0
             self.alive = False
-            
 
     def turnLeft(self):
         if (self.direction == constants.UP):
@@ -119,7 +121,7 @@ class Creature(pygame.sprite.Sprite):
         for food in foodList:
             distance = constants.WORLDSIZE
             
-            distance = self.getDistance(self.rect.centerx, self.rect.centery, food.rect.centerx, food.rect.centery)
+            distance = utility.getDistance(self.rect.centerx, self.rect.centery, food.rect.centerx, food.rect.centery)
 
             if (distance < self.viewDistance):
                 self.foodInView += 1
@@ -140,31 +142,34 @@ class Creature(pygame.sprite.Sprite):
                     
         #if no food was in view set center as closest food
         if (self.foodInView == 0):
-            self.nearestFoodDistance = self.getDistance(self.rect.centerx, self.rect.centery, 750, 750)
+            self.nearestFoodDistance = utility.getDistance(self.rect.centerx, self.rect.centery, 750, 750)
             self.nearestFoodX = 500
             self.nearestFoodY = 500
-            
-    #calculate the distance between two points
-    def getDistance(self, x1, y1, x2, y2):
-        return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-        
-    #calculate the angle between two vectors
-    def angleBetween(self, p1, p2):
-        ang1 = np.arctan2(*p1[::-1])
-        ang2 = np.arctan2(*p2[::-1])
-        return np.rad2deg((ang1 - ang2) % (2 * np.pi))
 
-    def getVectors(self, creatureX, creatureY, foodX, foodY):
-        xVector = foodX - creatureX
-        yVector = foodY - creatureY
-        return (xVector, yVector)
+    def randInheritValues(self):
+        self.viewDistance = random.randint(50, 400)
+        self.sleepTime = random.randint(50, 400)
+        self.metabolism = random.randint(1,8)
+    
+    #inherit properties from parent and then mutate them
+    def inherit(self, vd, st, m):
+        self.viewDistance = vd
+        self.sleepTime = st
+        self.metabolism = m
+        self.mutate()
 
-    def adjustAngle(self, angle):
-        if angle > 180:
-            angle = 360 - angle
-        else:
-            angle = angle * -1
-        return angle
+    #mutate inheritable variables by multiplying by a random number between 0.8 and 1.2
+    def mutate(self):
+        selectMutation = random.randint(0,3)
+        mutationAmmount = random.randint(8,12)
+        mutationAmmount = mutationAmmount / 10
+
+        if (selectMutation == 0):
+            self.viewDistance = round(self.viewDistance * mutationAmmount)
+        elif (selectMutation == 1):
+            self.sleepTime = round(self.sleepTime * mutationAmmount)
+        elif (selectMutation == 2):
+            self.metabolism = round(self.metabolism * mutationAmmount)
 
     #data to be passed to the NN
     def getData(self):
@@ -210,10 +215,10 @@ class Creature(pygame.sprite.Sprite):
             foodLeft = self.upFood
             foodRight = self.downFood
 
-        B = self.getVectors(self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY)
+        B = utility.getVectors(self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY)
             
-        angle = self.angleBetween(A, B)
+        angle = utility.angleBetween(A, B)
 
-        angle = self.adjustAngle(angle)
+        angle = utility.adjustAngle(angle)
 
         return[self.nearestFoodDistance, angle, foodForward, foodLeft, foodRight, distanceFromCreatureForward, distanceFromCreatureLeft, distanceFromCreatureRight]

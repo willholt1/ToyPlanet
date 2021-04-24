@@ -1,5 +1,6 @@
 import Food
 import Creature
+import utility
 import constants
 import random
 import math
@@ -29,9 +30,9 @@ class Herbivore(Creature.Creature):
     #Override
     def update(self, foodList, predators, action):
         if (self.energy > 0):
-            if (self.sleepCounter < 150):
+            if (self.sleepCounter < self.sleepTime):
                 self.sleepCounter += 1
-                if (self.sleepCounter == 150):
+                if (self.sleepCounter == self.sleepTime):
                     self.originalImage = pygame.image.load('sprites/creature_blue.png').convert_alpha()
                     self.image = self.originalImage
             else:
@@ -49,7 +50,7 @@ class Herbivore(Creature.Creature):
                 self.lookPredators(predators)
                 foodList = Creature.Creature.checkEat(self, foodList)
 
-                self.energy -= 1
+                self.energy -= self.metabolism
         else:
             if (self.foodEaten == 0):
                 self.fitness -= 10
@@ -75,14 +76,14 @@ class Herbivore(Creature.Creature):
         #loop through all the predators
         for predator in predators:
             distance = constants.WORLDSIZE
-            distance = self.getDistance(self.rect.centerx, self.rect.centery, predator.rect.centerx, predator.rect.centery)
+            distance = utility.getDistance(self.rect.centerx, self.rect.centery, predator.rect.centerx, predator.rect.centery)
 
             if (distance < self.viewDistance):
                 A = (0, -1)
-                B = Creature.Creature.getVectors(self, self.rect.centerx, self.rect.centery, predator.rect.centerx, predator.rect.centery)
+                B = utility.getVectors(self.rect.centerx, self.rect.centery, predator.rect.centerx, predator.rect.centery)
         
-                angleToPredator = Creature.Creature.angleBetween(self, A, B)
-                angleToPredator = Creature.Creature.adjustAngle(self, angleToPredator)
+                angleToPredator = utility.angleBetween(A, B)
+                angleToPredator = utility.adjustAngle(angleToPredator)
                 
                 #up
                 if ((-5 <= angleToPredator <= 5) and (distance < self.nearestUpPredator)):
@@ -116,7 +117,7 @@ class Herbivore(Creature.Creature):
                     
         #if no food was in view set center as closest food
         if (self.predatorsInView == 0):
-            self.nearestPredatorDistance = self.getDistance(self.rect.centerx, self.rect.centery, 0, 0)
+            self.nearestPredatorDistance = utility.getDistance(self.rect.centerx, self.rect.centery, 0, 0)
             self.nearestPredatorX = 0
             self.nearestPredatorY = 0
 
@@ -189,15 +190,15 @@ class Herbivore(Creature.Creature):
             predatorRelativeLeft =  self.nearestBottomPredator
             predatorRelativeBottomLeft = self.nearestBottomRightPredator
 
-        B = Creature.Creature.getVectors(self, self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY)
+        B = utility.getVectors(self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY)
         
-        angleToFood = Creature.Creature.angleBetween(self, A, B)
-        angleToFood = Creature.Creature.adjustAngle(self, angleToFood)
+        angleToFood = utility.angleBetween(A, B)
+        angleToFood = utility.adjustAngle(angleToFood)
 
-        B = Creature.Creature.getVectors(self, self.rect.centerx, self.rect.centery, self.nearestPredatorX, self.nearestPredatorY)
+        B = utility.getVectors(self.rect.centerx, self.rect.centery, self.nearestPredatorX, self.nearestPredatorY)
 
-        angleToPredator = Creature.Creature.angleBetween(self, A, B)
-        angleToPredator = Creature.Creature.adjustAngle(self, angleToPredator)
+        angleToPredator = utility.angleBetween(A, B)
+        angleToPredator = utility.adjustAngle(angleToPredator)
 
         return [self.nearestFoodDistance,       #distance in pixels to the nearest piece of food
                 angleToFood,                    #angle in degrees to the nearest piece of food relative to the creature
