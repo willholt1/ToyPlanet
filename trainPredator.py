@@ -1,15 +1,18 @@
+##################################
+#game loop for training predators#
+##################################
+#libraries
 import pygame
 import neat
-import random
-import pickle
-
-import constants
-import Herbivore
+#classes
 import Predator
 import Food
+#misc
+import constants
+import utility
 
+#setup pygame window
 pygame.init()
-
 screen = pygame.display.set_mode((constants.WORLDSIZE, constants.WORLDSIZE))
 pygame.display.set_caption('Toy Planet')
 clock = pygame.time.Clock()
@@ -21,6 +24,7 @@ def trainPredator(genomes, config):
     constants.HTRAINPREDATORMOVE = True
     allSprites = pygame.sprite.Group()
 
+    #create predators
     for id, genome in genomes:
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         nets.append(net)
@@ -30,12 +34,13 @@ def trainPredator(genomes, config):
         y = 500
         predator = Predator.Predator('sprites/creature_red.png', x, y)
         predator.training = True
-            
+        predator.sleepTime = 1
         predators.append(predator)
     
+    #create food
     foodList = []
     for i in range(constants.PTRAINFOODCOUNT):
-        foodList = trainReplenishFood(foodList)
+        foodList = utility.trainReplenishFood(foodList)
 
     lastFoodLen = len(foodList)
     ###########
@@ -52,26 +57,30 @@ def trainPredator(genomes, config):
                 if (event.key == pygame.K_ESCAPE):
                     running = False
 
-        #Update
+        #Update predators
         allSprites.empty()
         aliveCreatues = 0
         for i, predator in enumerate(predators):  
             if (predator.alive):
+                #pass data through NN
                 output = nets[i].activate(predator.getData())
+                #pass output of NN to the predator update function
                 decision = output.index(max(output)) + 1
                 foodList = predator.update(foodList, decision)
                 genomes[i][1].fitness = predator.fitness
                 aliveCreatues += 1
 
+                #generate more food if any was eaten
+                if (len(foodList)< lastFoodLen):
+                    foodList = utility.trainReplenishFood(foodList)
+
+                lastFoodLen = len(foodList)
+
         if (aliveCreatues == 0):
             running = False
 
-        if (len(foodList)< lastFoodLen):
-            foodList = trainReplenishFood(foodList)
-        
-        lastFoodLen = len(foodList)
-
         allSprites.add(predators, foodList)
+        
         #Draw
         screen.fill((245, 222, 179))
         allSprites.draw(screen)
@@ -80,15 +89,3 @@ def trainPredator(genomes, config):
         #keep program running at set FPS
         clock.tick(constants.FPS)
 
-def trainReplenishFood(foodList):
-    x, y = randomXY()
-    
-    foodSprite = Food.Food('sprites/plant.png', x, y)
-    foodList.append(foodSprite)
-    return foodList
-
-def randomXY():
-    x = random.randint(constants.SPAWNBORDER, (constants.WORLDSIZE - constants.SPAWNBORDER))
-    y = random.randint(constants.SPAWNBORDER, (constants.WORLDSIZE - constants.SPAWNBORDER))
-
-    return x, y

@@ -1,15 +1,20 @@
+###################################
+#game loop for training herbivores#
+###################################
+#libraries
 import pygame
 import neat
-import random
 import pickle
-
-import constants
+#classes
 import Herbivore
 import Predator
 import Food
+#misc
+import utility
+import constants
 
+#setup pygame window
 pygame.init()
-
 screen = pygame.display.set_mode((constants.WORLDSIZE, constants.WORLDSIZE))
 pygame.display.set_caption('Toy Planet')
 clock = pygame.time.Clock()
@@ -23,6 +28,7 @@ def trainHerbivore(genomes, config):
 
     allSprites = pygame.sprite.Group()
     
+    #if moving predators is set to true, load in predator brain
     if (constants.HTRAINPREDATORMOVE):
         configPathPredator = 'NEAT_configs/neat-config-predators.txt'
         predatorConfig = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPathPredator)
@@ -33,9 +39,9 @@ def trainHerbivore(genomes, config):
         #create predator brain
         predatorNet = neat.nn.FeedForwardNetwork.create(predatorGenome, predatorConfig)
 
-
+    #create predators
     for i in range(constants.HTRAINPREDATORCOUNT):
-        x, y = randomXY()
+        x, y = utility.randomXY()
         predator = Predator.Predator('sprites/creature_red.png', x, y)
         predator.viewDistance = 1500
         predators.append(predator)
@@ -50,12 +56,13 @@ def trainHerbivore(genomes, config):
         y = 500
         animat = Herbivore.Herbivore('sprites/creature_blue.png', x, y)
         animat.training = True
-            
+        animat.sleepTime = 1
         herbivores.append(animat)
     
+    #create food
     foodList = []
     for i in range(constants.HTRAINFOODCOUNT):
-        foodList = trainReplenishFood(foodList)
+        foodList = utility.trainReplenishFood(foodList)
 
     lastFoodLen = len(foodList)
     ###########
@@ -75,23 +82,31 @@ def trainHerbivore(genomes, config):
         #Update
         allSprites.empty()
         aliveCreatues = 0
+        #update herbivores
         for i, herbivore in enumerate(herbivores):
             if (herbivore.alive):
+                #run data through NN
                 output = nets[i].activate(herbivore.getData())
+                #pass the highest weighted desicion to the update function of the sprite
                 decision = output.index(max(output)) + 1
                 foodList = herbivore.update(foodList, predators, decision)
+                #update fitness
                 genomes[i][1].fitness = herbivore.fitness
                 aliveCreatues += 1
 
+                #if food was eaten, generate more
                 if (len(foodList)< lastFoodLen):
-                    foodList = trainReplenishFood(foodList)
+                    foodList = utility.trainReplenishFood(foodList)
         
                 lastFoodLen = len(foodList)
 
+        #if no more herbivores are alive, stop the generation
         if (aliveCreatues == 0):
             running = False
 
+        #update predators
         for predator in predators:
+            #only call NN if predator moving is set to true
             if (constants.HTRAINPREDATORMOVE):
                 output = predatorNet.activate(predator.getData())
                 decision = output.index(max(output)) + 1
@@ -101,6 +116,7 @@ def trainHerbivore(genomes, config):
             predator.energy += 1
 
         allSprites.add(predators, herbivores, foodList)
+        
         #Draw
         screen.fill((245, 222, 179))
         allSprites.draw(screen)
@@ -109,16 +125,3 @@ def trainHerbivore(genomes, config):
         #keep program running at set FPS
         clock.tick(constants.FPS)
 ############################END trainHerbivore############################
-
-def trainReplenishFood(foodList):
-    x, y = randomXY()
-    
-    foodSprite = Food.Food('sprites/plant.png', x, y)
-    foodList.append(foodSprite)
-    return foodList
-
-def randomXY():
-    x = random.randint(constants.SPAWNBORDER, (constants.WORLDSIZE - constants.SPAWNBORDER))
-    y = random.randint(constants.SPAWNBORDER, (constants.WORLDSIZE - constants.SPAWNBORDER))
-
-    return x, y

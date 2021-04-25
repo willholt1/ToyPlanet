@@ -1,11 +1,15 @@
-import Food
-import Creature
-import utility
-import constants
-import random
-import math
-import numpy as np
+#########################################################################
+#class for herbivore sprites - has functionality for detecting predators#
+#########################################################################
+#libraries
 import pygame
+import random
+#classes
+import Creature
+import Food
+#misc
+import constants
+import utility
 
 class Herbivore(Creature.Creature):
     def __init__(self, image, x, y):
@@ -13,6 +17,7 @@ class Herbivore(Creature.Creature):
 
         self.speed = 2
 
+        #creature sensory data
         self.nearestPredatorDistance = 1000
         self.nearestPredatorX = 0
         self.nearestPredatorY = 0
@@ -32,6 +37,7 @@ class Herbivore(Creature.Creature):
         if (self.energy > 0):
             if (self.sleepCounter < self.sleepTime):
                 self.sleepCounter += 1
+                #hatch creature from egg
                 if (self.sleepCounter == self.sleepTime):
                     self.originalImage = pygame.image.load('sprites/creature_blue.png').convert_alpha()
                     self.image = self.originalImage
@@ -61,6 +67,7 @@ class Herbivore(Creature.Creature):
 
         return foodList
 
+    #loop through all the predators and set sensory data for the closest ones - similar to look function in Creature.py
     def lookPredators(self, predators):
         self.nearestPredatorDistance = self.viewDistance
         self.predatorsInView = 0
@@ -73,7 +80,6 @@ class Herbivore(Creature.Creature):
         self.nearestBottomLeftPredator = self.viewDistance
         self.nearestBottomPredator = self.viewDistance
 
-        #loop through all the predators
         for predator in predators:
             distance = constants.WORLDSIZE
             distance = utility.getDistance(self.rect.centerx, self.rect.centery, predator.rect.centerx, predator.rect.centery)
@@ -121,14 +127,15 @@ class Herbivore(Creature.Creature):
             self.nearestPredatorX = 0
             self.nearestPredatorY = 0
 
-    #Override
     #data to be passed to the NN
     def getData(self):
+        #calculate distances from the walls
         distanceFromTop = self.rect.centery
         distanceFromBottom = (1000 - self.rect.centery)
         distanceFromLeft = self.rect.centerx
         distanceFromRight = (1000 - self.rect.centerx)
 
+        #convert all creature sensory data to be relative to the direction it is facing
         if (self.direction == constants.UP):
             A = (0, -1)
             distanceFromCreatureForward = distanceFromTop
@@ -190,13 +197,13 @@ class Herbivore(Creature.Creature):
             predatorRelativeLeft =  self.nearestBottomPredator
             predatorRelativeBottomLeft = self.nearestBottomRightPredator
 
+        #calculate angle to nearest piece of food
         B = utility.getVectors(self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY)
-        
         angleToFood = utility.angleBetween(A, B)
         angleToFood = utility.adjustAngle(angleToFood)
 
+        #calculate angle to nearest predator
         B = utility.getVectors(self.rect.centerx, self.rect.centery, self.nearestPredatorX, self.nearestPredatorY)
-
         angleToPredator = utility.angleBetween(A, B)
         angleToPredator = utility.adjustAngle(angleToPredator)
 
@@ -207,13 +214,13 @@ class Herbivore(Creature.Creature):
                 foodRight,                      #amount of food to the right of the creature
                 self.nearestPredatorDistance,   #distance in pixels to the nearest predator
                 angleToPredator,                #angle in degrees to the nearest predator relative to the creature
-                predatorRelativeForward,
-                predatorRelativeTopRight,
-                predatorRelativeRight,
-                predatorRelativeBottomRight,
-                predatorRelativeTopLeft,
-                predatorRelativeLeft,
-                predatorRelativeBottomLeft, 
-                distanceFromCreatureForward,    #distance from the wall forward
-                distanceFromCreatureLeft,       #distance from the wall left
-                distanceFromCreatureRight]      #distance from the wall right
+                predatorRelativeForward,        #distance in pixels to the nearest predator directly in front
+                predatorRelativeTopRight,       #distance in pixels to the nearest predator to the top right
+                predatorRelativeRight,          #distance in pixels to the nearest predator to the right
+                predatorRelativeBottomRight,    #distance in pixels to the nearest predator to the bottom right
+                predatorRelativeTopLeft,        #distance in pixels to the nearest predator to the top left
+                predatorRelativeLeft,           #distance in pixels to the nearest predator to the left
+                predatorRelativeBottomLeft,     #distance in pixels to the nearest predator to the bottom left
+                distanceFromCreatureForward,    #distance in pixels from the wall in front
+                distanceFromCreatureLeft,       #distance in pixels from the wall left
+                distanceFromCreatureRight]      #distance in pixels from the wall right

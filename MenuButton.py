@@ -1,5 +1,8 @@
+##################################################
+#simple class for button sprites used in the menu#
+##################################################
+#libraries
 import pygame
-
 class MenuButton(pygame.sprite.Sprite):
     def __init__(self, image, x, y):
         pygame.sprite.Sprite.__init__(self)

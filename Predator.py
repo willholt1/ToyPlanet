@@ -1,10 +1,14 @@
-import Food
-import Creature
-import utility
-import random
-import math
-import numpy as np
+############################
+#class for predator sprites#
+############################
+#libraries
 import pygame
+import random
+#classes
+import Creature
+import Food
+#misc
+import utility
 import constants
 
 class Predator(Creature.Creature):
@@ -16,10 +20,12 @@ class Predator(Creature.Creature):
     def update(self, foodList, action):
         if (self.sleepCounter < self.sleepTime):
             self.sleepCounter += 1
+            #hatch from egg
             if (self.sleepCounter == self.sleepTime):
-                    self.originalImage = pygame.image.load('sprites/creature_red.png').convert_alpha()
-                    self.image = self.originalImage
+                self.originalImage = pygame.image.load('sprites/creature_red.png').convert_alpha()
+                self.image = self.originalImage
         else:
+            #if set to be unable to move, just check for contact with food
             if (constants.HTRAINPREDATORMOVE == True):
                 if (self.energy > 0):
                     #perform action determined by the NN
@@ -99,3 +105,59 @@ class Predator(Creature.Creature):
                     foodList.remove(food)
                     break
         return foodList
+
+    #data to be passed to the NN
+    def getData(self):
+        #calculate distance from the walls
+        distanceFromTop = self.rect.centery
+        distanceFromBottom = (1000 - self.rect.centery)
+        distanceFromLeft = self.rect.centerx
+        distanceFromRight = (1000 - self.rect.centerx)
+
+        #convert all creature sensory data to be relative to the direction it is facing
+        if (self.direction == constants.UP):
+            A = (0, -1)
+            distanceFromCreatureForward = distanceFromTop
+            distanceFromCreatureLeft = distanceFromLeft
+            distanceFromCreatureRight = distanceFromRight
+            foodForward = self.upFood
+            foodLeft = self.leftFood
+            foodRight = self.rightFood
+        elif (self.direction == constants.DOWN):
+            A = (0, 1)
+            distanceFromCreatureForward = distanceFromBottom
+            distanceFromCreatureLeft = distanceFromRight
+            distanceFromCreatureRight = distanceFromLeft
+            foodForward = self.downFood
+            foodLeft = self.rightFood
+            foodRight = self.leftFood
+        elif (self.direction == constants.LEFT):
+            A = (-1, 0)
+            distanceFromCreatureForward = distanceFromLeft
+            distanceFromCreatureLeft = distanceFromBottom
+            distanceFromCreatureRight = distanceFromTop
+            foodForward = self.leftFood
+            foodLeft = self.downFood
+            foodRight = self.upFood
+        else:
+            A = (1, 0)
+            distanceFromCreatureForward = distanceFromRight
+            distanceFromCreatureLeft = distanceFromTop
+            distanceFromCreatureRight = distanceFromBottom
+            foodForward = self.rightFood
+            foodLeft = self.upFood
+            foodRight = self.downFood
+
+        #calculate angle to nearest piece of food
+        B = utility.getVectors(self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY)
+        angle = utility.angleBetween(A, B)
+        angle = utility.adjustAngle(angle)
+
+        return [self.nearestFoodDistance,           #distance in pixels to the nearest piece of food
+                angle,                              #angle in degrees to the nearest piece of food relative to the creature
+                foodForward,                        #amount of food in front of the creature
+                foodLeft,                           #amount of food to the left of the creature
+                foodRight,                          #amount of food to the right of the creature
+                distanceFromCreatureForward,        #distance in pixels from the wall in front
+                distanceFromCreatureLeft,           #distance in pixels from the wall left
+                distanceFromCreatureRight]          #distance in pixels from the wall right

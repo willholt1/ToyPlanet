@@ -1,23 +1,29 @@
+#libraries
 import pygame
 import neat
 import random
 import csv
-import constants
+import os
+#classes
 import Herbivore
 import Predator
 import Food
-import os
+#misc
+import constants
+import utility
 
+#setup pygame window
 pygame.init()
-
 screen = pygame.display.set_mode((constants.WORLDSIZE, constants.WORLDSIZE))
 pygame.display.set_caption('Toy Planet')
 clock = pygame.time.Clock()
 
+#declare font
 fontSmall = pygame.font.SysFont('timesnewroman', 14)
 
 def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
     #data output files
+    #delete files if they already exist
     if (os.path.isfile('dataOutput/HerbivoreData.csv')):
         os.remove('dataOutput/HerbivoreData.csv')
     if (os.path.isfile('dataOutput/PredatorData.csv')):
@@ -37,15 +43,29 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
     #label columns
     with open('dataOutput/HerbivoreData.csv', 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['fitness', 'foodEaten', 'distanceTravelled', 'children', 'viewDistance', 'sleepTime', 'metabolism'])
+        writer.writerow(['fitness',
+                         'foodEaten',
+                         'distanceTravelled',
+                         'children',
+                         'viewDistance',
+                         'sleepTime',
+                         'metabolism'])
 
     with open('dataOutput/PredatorData.csv', 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['fitness', 'foodEaten', 'distanceTravelled', 'children', 'viewDistance', 'sleepTime', 'metabolism'])
+        writer.writerow(['fitness',
+                         'foodEaten',
+                         'distanceTravelled',
+                         'children',
+                         'viewDistance',
+                         'sleepTime',
+                         'metabolism'])
 
     with open('dataOutput/PopulationData.csv', 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['plants', 'herbivores', 'predators'])
+        writer.writerow(['plants',
+                         'herbivores',
+                         'predators'])
 
     #init NEAT
     herbivores = []
@@ -57,19 +77,20 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
     predatorNet = neat.nn.FeedForwardNetwork.create(predatorGenome, predatorConfig)
 
     #create herbivores
-    for i in range(round(constants.POPULATION * 0.9)):
-        x, y = randomXY()
+    for i in range(round(constants.POPULATION * 0.8)):
+        x, y = utility.randomXY()
         animat = Herbivore.Herbivore('sprites/creature_blue.png', x, y)
         animat.randInheritValues()
         herbivores.append(animat)
     
     #create predators
-    for i in range(round(constants.POPULATION * 0.1)):
-        x, y = randomXY()
+    for i in range(round(constants.POPULATION * 0.2)):
+        x, y = utility.randomXY()
         animat = Predator.Predator('sprites/creature_red.png', x, y)
         animat.randInheritValues()
         predators.append(animat)
 
+    #generate food
     foodList = []
     for i in range(constants.POPULATION):
         foodList = runReplenishFood(foodList)
@@ -91,21 +112,29 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         #Update
         allSprites.empty()
         aliveCreatues = 0
+        #update herbivores
         for herbivore in herbivores:
+            #run NN and update herbivore
             output = herbivoreNet.activate(herbivore.getData())
             decision = output.index(max(output)) + 1
             foodList = herbivore.update(foodList, predators, decision)
             
-            #check if alive
+            #check if alive, if dead write data to file
             if (herbivore.alive):
                 aliveCreatues += 1
             else:
                 with open('dataOutput/HerbivoreData.csv', 'a', newline='') as file:
                     writer = csv.writer(file)
-                    writer.writerow([herbivore.fitness, herbivore.foodEaten, herbivore.distanceTravelled, herbivore.children, herbivore.viewDistance, herbivore.sleepTime, herbivore.metabolism])
+                    writer.writerow([herbivore.fitness,
+                                     herbivore.foodEaten,
+                                     herbivore.distanceTravelled,
+                                     herbivore.children,
+                                     herbivore.viewDistance,
+                                     herbivore.sleepTime,
+                                     herbivore.metabolism])
                 herbivores.remove(herbivore)
 
-            #reproduce
+            #reproduce and pass values to child
             if (herbivore.energy > constants.HREPRODUCTIONTHRESHOLD):
                 x = herbivore.rect.centerx
                 y = herbivore.rect.centery
@@ -115,22 +144,30 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
                 herbivores.append(animat)
                 herbivore.energy = herbivore.energy / 2
                 herbivore.children += 1
-            
+
+        #update predators
         for predator in predators:
+            #run NN and update predator
             output = predatorNet.activate(predator.getData())
             decision = output.index(max(output)) + 1
             herbivores = predator.update(herbivores, decision)
             
-            #check if alive
+            #check if alive, if dead write data to file
             if (predator.alive):
                 aliveCreatues += 1
             else:
                 with open('dataOutput/PredatorData.csv', 'a', newline='') as file:
                     writer = csv.writer(file)
-                    writer.writerow([predator.fitness, predator.foodEaten, predator.distanceTravelled, predator.children, predator.viewDistance, predator.sleepTime, predator.metabolism])
+                    writer.writerow([predator.fitness,
+                                     predator.foodEaten,
+                                     predator.distanceTravelled,
+                                     predator.children,
+                                     predator.viewDistance,
+                                     predator.sleepTime,
+                                     predator.metabolism])
                 predators.remove(predator)
 
-            #reproduce
+            #reproduce and pass values to child
             if (predator.energy > constants.PREPRODUCTIONTHRESHOLD):
                 x = predator.rect.centerx
                 y = predator.rect.centery
@@ -141,6 +178,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
                 predator.energy = predator.energy / 2
                 predator.children += 1
         
+        #every 50 frames save population data to a file
         popDataCount += 1
         if (popDataCount > 50):
             with open('dataOutput/PopulationData.csv', 'a', newline='') as file:
@@ -151,8 +189,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         if (aliveCreatues == 0):
             running = False
         
-        #chance more food is generated. if more creatures, greater chance for food to be generated
-        #if (random.randint(0,100) < (30 - round(len(herbivores)/4))) and (len(foodList) < 500):
+        #generate more food
         if (random.randint(0,100) < constants.FOODRESPAWN):
             foodList = runReplenishFood(foodList)
 
@@ -162,14 +199,15 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         screen.fill((245, 222, 179))
         allSprites.draw(screen)
 
+        #display ammount of food
         foodCount = 'Food count: '+str(len(foodList))
         img = fontSmall.render(foodCount, True, (0,0,0))
         screen.blit(img, (10, 930))
-
+        #display herbivore population
         hPop = 'H population: '+str(len(herbivores))
         img = fontSmall.render(hPop, True, (0,0,0))
         screen.blit(img, (10, 950))
-
+        #display predator population
         pPop = 'P population: '+str(len(predators))
         img = fontSmall.render(pPop, True, (0,0,0))
         screen.blit(img, (10, 970))
@@ -179,14 +217,9 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         #keep program running at set FPS
         clock.tick(constants.FPS)
 
-def randomXY():
-    x = random.randint(constants.SPAWNBORDER, (constants.WORLDSIZE - constants.SPAWNBORDER))
-    y = random.randint(constants.SPAWNBORDER, (constants.WORLDSIZE - constants.SPAWNBORDER))
-
-    return x, y
-
+#function to generate food in clumps
 def runReplenishFood(foodList):
-    clusterX, clusterY = randomXY()
+    clusterX, clusterY = utility.randomXY()
     for i in range(random.randint(1, constants.FOODCLUMPSIZE)):
         x = clusterX + random.randint(-constants.FOODDENSITY, constants.FOODDENSITY)
         y = clusterY + random.randint(-constants.FOODDENSITY, constants.FOODDENSITY)

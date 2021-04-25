@@ -1,10 +1,14 @@
+#################################################################
+#Creature object, parent class to Herbivore and Predator classes#
+#################################################################
+#libraries
+import pygame
+import random
+#classes
 import Food
+#misc
 import constants
 import utility
-import random
-import math
-import numpy as np
-import pygame
 
 class Creature(pygame.sprite.Sprite):
     def __init__(self, image, x, y):
@@ -14,12 +18,13 @@ class Creature(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.training = False
-        #creature attributes
+
+        #creature attribute defaults
         self.speed = 1
         #inheritable attributes
         self.viewDistance = 250
         self.sleepTime = 150
-        self.metabolism = 6
+        self.metabolism = 1
 
         #status variables
         self.direction = constants.UP
@@ -28,7 +33,7 @@ class Creature(pygame.sprite.Sprite):
         self.fitness = 0
         self.sleepCounter = 0
 
-        #creature memory
+        #creature sensory data - used for NN
         self.nearestFoodX = constants.WORLDSIZE/2
         self.nearestFoodY = constants.WORLDSIZE/2
         self.nearestFoodDistance = 0
@@ -43,6 +48,7 @@ class Creature(pygame.sprite.Sprite):
         self.foodEaten = 0 
         self.children = 0
 
+    #move creature forward in whatever direction it is facing
     def move(self):
         if (self.direction == constants.UP and self.rect.centery > 5):
             self.rect.centery -= self.speed
@@ -57,11 +63,12 @@ class Creature(pygame.sprite.Sprite):
             self.rect.centerx += self.speed
             self.distanceTravelled += 1
         else:
-            #decrease fitness if move is invalid
+            #decrease fitness and kill if move is invalid
             self.fitness -= 10
             self.energy = 0
             self.alive = False
 
+    #rotate creature 90 degrees to the left
     def turnLeft(self):
         if (self.direction == constants.UP):
             self.direction = constants.LEFT
@@ -78,6 +85,7 @@ class Creature(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
     
+    #rotate creature 90 degrees to the right
     def turnRight(self):
         if (self.direction == constants.UP):
             self.direction = constants.RIGHT
@@ -146,10 +154,11 @@ class Creature(pygame.sprite.Sprite):
             self.nearestFoodX = 500
             self.nearestFoodY = 500
 
+    #init inheritable attributes to random numbers
     def randInheritValues(self):
-        self.viewDistance = random.randint(50, 400)
-        self.sleepTime = random.randint(150, 500)
-        self.metabolism = random.randint(3,9)
+        self.viewDistance = random.randint(constants.VIEWDISTANCEMIN, constants.VIEWDISTANCEMAX)
+        self.sleepTime = random.randint(constants.SLEEPTIMEMIN, constants.SLEEPTIMEMAX)
+        self.metabolism = random.randint(constants.METABOLISMMIN, constants.METABOLISMMAX)
     
     #inherit properties from parent and then mutate them
     def inherit(self, vd, st, m):
@@ -160,65 +169,27 @@ class Creature(pygame.sprite.Sprite):
 
     #mutate inheritable variables by multiplying by a random number between 0.8 and 1.2
     def mutate(self):
-        selectMutation = random.randint(0,3)
-        mutationAmmount = random.randint(32,48)
-        mutationAmmount = mutationAmmount / 40
+        mutated = False
 
-        if (selectMutation == 0):
-            self.viewDistance = round(self.viewDistance * mutationAmmount)
-        elif (selectMutation == 1):
-            self.sleepTime = round(self.sleepTime * mutationAmmount)
-        elif (selectMutation == 2):
-            self.metabolism = round(self.metabolism * mutationAmmount)
+        while (not mutated):
+            selectMutation = random.randint(0,3)
+            mutationAmmount = random.randint(32,48)
+            mutationAmmount = mutationAmmount / 40
 
-    #data to be passed to the NN
-    def getData(self):
-        distanceFromTop = self.rect.centery
-        distanceFromBottom = (1000 - self.rect.centery)
-        distanceFromLeft = self.rect.centerx
-        distanceFromRight = (1000 - self.rect.centerx)
-
-        distanceFromCreatureForward = 0
-        distanceFromCreatureLeft = 0
-        distanceFromCreatureRight = 0
-
-        if (self.direction == constants.UP):
-            A = (0, -1)
-            distanceFromCreatureForward = distanceFromTop
-            distanceFromCreatureLeft = distanceFromLeft
-            distanceFromCreatureRight = distanceFromRight
-            foodForward = self.upFood
-            foodLeft = self.leftFood
-            foodRight = self.rightFood
-        elif (self.direction == constants.DOWN):
-            A = (0, 1)
-            distanceFromCreatureForward = distanceFromBottom
-            distanceFromCreatureLeft = distanceFromRight
-            distanceFromCreatureRight = distanceFromLeft
-            foodForward = self.downFood
-            foodLeft = self.rightFood
-            foodRight = self.leftFood
-        elif (self.direction == constants.LEFT):
-            A = (-1, 0)
-            distanceFromCreatureForward = distanceFromLeft
-            distanceFromCreatureLeft = distanceFromBottom
-            distanceFromCreatureRight = distanceFromTop
-            foodForward = self.leftFood
-            foodLeft = self.downFood
-            foodRight = self.upFood
-        else:
-            A = (1, 0)
-            distanceFromCreatureForward = distanceFromRight
-            distanceFromCreatureLeft = distanceFromTop
-            distanceFromCreatureRight = distanceFromBottom
-            foodForward = self.rightFood
-            foodLeft = self.upFood
-            foodRight = self.downFood
-
-        B = utility.getVectors(self.rect.centerx, self.rect.centery, self.nearestFoodX, self.nearestFoodY)
-            
-        angle = utility.angleBetween(A, B)
-
-        angle = utility.adjustAngle(angle)
-
-        return[self.nearestFoodDistance, angle, foodForward, foodLeft, foodRight, distanceFromCreatureForward, distanceFromCreatureLeft, distanceFromCreatureRight]
+            if (selectMutation == 0):
+                mutatedVal = round(self.viewDistance * mutationAmmount)
+                if (constants.VIEWDISTANCEMIN >= mutatedVal >= constants.VIEWDISTANCEMAX):
+                    self.viewDistance = mutatedVal
+                    mutated = True
+            elif (selectMutation == 1):
+                mutatedVal = round(self.sleepTime * mutationAmmount)
+                if (constants.SLEEPTIMEMIN >= mutatedVal >= constants.SLEEPTIMEMAX):
+                    self.sleepTime = mutatedVal
+                    mutated = True
+            elif (selectMutation == 2):
+                mutatedVal = round(self.metabolism * mutationAmmount)
+                if (constants.METABOLISMMIN >= mutatedVal >= constants.METABOLISMMAX):
+                    self.metabolism = mutatedVal
+                    mutated = True
+            elif (selectMutation == 3):
+                mutated = True

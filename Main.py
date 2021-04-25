@@ -1,27 +1,31 @@
+#############################################################
+#entry point for the program and contains the menu game loop#
+#############################################################
+#libraries
 import pygame
-import random
-import Herbivore
-import Predator
-import constants
-import MenuButton
-import Food
 import neat
 import pickle
+#classes
+import MenuButton
+#misc
+import constants
 import runPlanet
 import trainHerbivore
 import trainPredator
 
+#setup pygame window
 pygame.init()
-
 screen = pygame.display.set_mode((constants.WORLDSIZE, constants.WORLDSIZE))
 pygame.display.set_caption('Toy Planet')
 clock = pygame.time.Clock()
 
+#declare fonts
 font = pygame.font.SysFont('timesnewroman', 36)
 labelFont = pygame.font.SysFont('timesnewroman', 24)
 
 def menu():
     click = False
+    #create all the button objects and add to sprite group to display
     buttons = pygame.sprite.Group()
     trainPredatorButton = MenuButton.MenuButton('sprites/train_predators.png', 170, 100)
     trainHerbivoreButton = MenuButton.MenuButton('sprites/train_herbivores.png', 170, 300)
@@ -99,8 +103,10 @@ def menu():
                 foodEnergyPlus,
                 foodEnergyMinus)
     
+    #menu game loop
     while True:
         #Events
+        #if the mouse position is over a button and the mouse is clicked then do the corresponding action
         mx, my = pygame.mouse.get_pos()
         if (pTrainFoodCountPlus.rect.collidepoint((mx, my))):
             if (click):
@@ -214,6 +220,8 @@ def menu():
                     constants.FOODENERGY -= 10
         if (trainPredatorButton.rect.collidepoint((mx, my))):
             if (click):
+                print('Training Predators...\npress esc to skip generation')
+                #load neat config
                 configPath = 'NEAT_configs/neat-config-predators.txt'
                 config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPath)
                 p = neat.Population(config)
@@ -223,7 +231,6 @@ def menu():
                 stats = neat.StatisticsReporter()
                 p.add_reporter(stats)
                 
-                print('Training Predators...')
                 #run neat
                 winner = p.run(trainPredator.trainPredator, constants.PTRAINGENERATIONS)
                 #save winner
@@ -232,16 +239,17 @@ def menu():
                     f.close()
         if (trainHerbivoreButton.rect.collidepoint((mx, my))):
             if (click):
+                print('Training Herbivores...\npress esc to skip generation')
+                #load neat config
                 configPath = 'NEAT_configs/neat-config-herbivores.txt'
                 config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPath)
-
                 p = neat.Population(config)
 
                 #data output
                 p.add_reporter(neat.StdOutReporter(True))
                 stats = neat.StatisticsReporter()
                 p.add_reporter(stats)
-                print('Training Herbivores...')
+
                 #run neat
                 winner = p.run(trainHerbivore.trainHerbivore, constants.HTRAINGENERATIONS)
                 #save winner
@@ -250,19 +258,19 @@ def menu():
                     f.close()
         if (runPlanetButton.rect.collidepoint((mx, my))):
             if (click):
-                print('Running Simulation...')
+                print('Running Simulation...\npress esc to terminate')
+                #load neat configs
                 configPathHerbivore = 'NEAT_configs/neat-config-herbivores.txt'
                 configPathPredator = 'NEAT_configs/neat-config-predators.txt'
-
                 herbivoreConfig = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPathHerbivore)
                 predatorConfig = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPathPredator)
 
-                # load herbivore
+                # load herbivore NN
                 with open("savedNNs/herbivore.pkl", "rb") as f:
                     herbivoreGenome = pickle.load(f)
                     f.close()
 
-                # load predator
+                # load predator NN
                 with open("savedNNs/predator.pkl", "rb") as f:
                     predatorGenome = pickle.load(f)
                     f.close()
@@ -282,6 +290,7 @@ def menu():
         #Draw
         screen.fill((245, 222, 179))
         buttons.draw(screen)
+        #draw labels and values for the menu
         #pTrainFoodCount
         img = font.render(str(constants.PTRAINFOODCOUNT), True, (0,0,0))
         screen.blit(img, (432, 80))
@@ -366,7 +375,6 @@ def menu():
         #keep program running at set FPS
         clock.tick(constants.FPS)
 ############################END Menu############################
-
 
 if __name__ == "__main__":
     menu()
