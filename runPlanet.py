@@ -25,6 +25,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
     if (os.path.isfile('dataOutput/PopulationData.csv')):   
         os.remove('dataOutput/PopulationData.csv')
 
+    #create files
     f = open('dataOutput/HerbivoreData.csv', 'x')
     f.close()
     f = open('dataOutput/PredatorData.csv', 'x')
@@ -32,6 +33,19 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
     f = open('dataOutput/PopulationData.csv', 'x')
     f.close()
     popDataCount = 0
+
+    #label columns
+    with open('dataOutput/HerbivoreData.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['fitness', 'foodEaten', 'distanceTravelled', 'children', 'viewDistance', 'sleepTime', 'metabolism'])
+
+    with open('dataOutput/PredatorData.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['fitness', 'foodEaten', 'distanceTravelled', 'children', 'viewDistance', 'sleepTime', 'metabolism'])
+
+    with open('dataOutput/PopulationData.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['plants', 'herbivores', 'predators'])
 
     #init NEAT
     herbivores = []
@@ -97,6 +111,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
                 y = herbivore.rect.centery
                 animat = Herbivore.Herbivore('sprites/egg_blue.png', x, y)
                 animat.inherit(herbivore.viewDistance, herbivore.sleepTime, herbivore.metabolism)
+                animat.energy = herbivore.energy / 2
                 herbivores.append(animat)
                 herbivore.energy = herbivore.energy / 2
                 herbivore.children += 1
@@ -117,10 +132,11 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
 
             #reproduce
             if (predator.energy > constants.PREPRODUCTIONTHRESHOLD):
-                x = herbivore.rect.centerx
-                y = herbivore.rect.centery
+                x = predator.rect.centerx
+                y = predator.rect.centery
                 animat = Predator.Predator('sprites/egg_pink.png', x, y)
                 animat.inherit(predator.viewDistance, predator.sleepTime, predator.metabolism)
+                animat.energy = predator.energy / 2
                 predators.append(animat)
                 predator.energy = predator.energy / 2
                 predator.children += 1

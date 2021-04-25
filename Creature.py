@@ -148,8 +148,8 @@ class Creature(pygame.sprite.Sprite):
 
     def randInheritValues(self):
         self.viewDistance = random.randint(50, 400)
-        self.sleepTime = random.randint(50, 400)
-        self.metabolism = random.randint(1,8)
+        self.sleepTime = random.randint(150, 500)
+        self.metabolism = random.randint(3,9)
     
     #inherit properties from parent and then mutate them
     def inherit(self, vd, st, m):
@@ -161,8 +161,8 @@ class Creature(pygame.sprite.Sprite):
     #mutate inheritable variables by multiplying by a random number between 0.8 and 1.2
     def mutate(self):
         selectMutation = random.randint(0,3)
-        mutationAmmount = random.randint(8,12)
-        mutationAmmount = mutationAmmount / 10
+        mutationAmmount = random.randint(32,48)
+        mutationAmmount = mutationAmmount / 40
 
         if (selectMutation == 0):
             self.viewDistance = round(self.viewDistance * mutationAmmount)
