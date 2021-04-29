@@ -52,16 +52,16 @@ class Creature(pygame.sprite.Sprite):
     def move(self):
         if (self.direction == constants.UP and self.rect.centery > 5):
             self.rect.centery -= self.speed
-            self.distanceTravelled += 1
+            self.distanceTravelled += self.speed
         elif (self.direction == constants.DOWN and self.rect.centery < (constants.WORLDSIZE - 5)):
             self.rect.centery += self.speed
-            self.distanceTravelled += 1
+            self.distanceTravelled += self.speed
         elif (self.direction == constants.LEFT and self.rect.centerx > 5):
             self.rect.centerx -= self.speed
-            self.distanceTravelled += 1
+            self.distanceTravelled += self.speed
         elif (self.direction == constants.RIGHT and self.rect.centerx < (constants.WORLDSIZE - 5)):
             self.rect.centerx += self.speed
-            self.distanceTravelled += 1
+            self.distanceTravelled += self.speed
         else:
             #decrease fitness and kill if move is invalid
             self.fitness -= 10
@@ -167,27 +167,26 @@ class Creature(pygame.sprite.Sprite):
         self.metabolism = m
         self.mutate()
 
-    #mutate inheritable variables by multiplying by a random number between 0.8 and 1.2
+    #mutate inheritable variables
     def mutate(self):
         mutated = False
 
         while (not mutated):
             selectMutation = random.randint(0,3)
-            mutationAmmount = random.randint(32,48)
-            mutationAmmount = mutationAmmount / 40
+            mutationAmmount = random.randint(-1, 1)
 
             if (selectMutation == 0):
-                mutatedVal = round(self.viewDistance * mutationAmmount)
+                mutatedVal = round(self.viewDistance + (mutationAmmount * 10))
                 if (constants.VIEWDISTANCEMIN >= mutatedVal >= constants.VIEWDISTANCEMAX):
                     self.viewDistance = mutatedVal
                     mutated = True
             elif (selectMutation == 1):
-                mutatedVal = round(self.sleepTime * mutationAmmount)
+                mutatedVal = round(self.sleepTime + (mutationAmmount * 10))
                 if (constants.SLEEPTIMEMIN >= mutatedVal >= constants.SLEEPTIMEMAX):
                     self.sleepTime = mutatedVal
                     mutated = True
             elif (selectMutation == 2):
-                mutatedVal = round(self.metabolism * mutationAmmount)
+                mutatedVal = round(self.metabolism + mutationAmmount)
                 if (constants.METABOLISMMIN >= mutatedVal >= constants.METABOLISMMAX):
                     self.metabolism = mutatedVal
                     mutated = True

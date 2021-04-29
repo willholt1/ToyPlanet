@@ -180,7 +180,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         
         #every 50 frames save population data to a file
         popDataCount += 1
-        if (popDataCount > 50):
+        if (popDataCount > 60):
             with open('dataOutput/PopulationData.csv', 'a', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow([len(foodList), len(herbivores), len(predators)])

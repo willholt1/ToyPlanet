@@ -44,6 +44,7 @@ def trainHerbivore(genomes, config):
         x, y = utility.randomXY()
         predator = Predator.Predator('sprites/creature_red.png', x, y)
         predator.viewDistance = 1500
+        predator.sleepTime = 20
         predators.append(predator)
 
     #create herbivores
@@ -93,7 +94,7 @@ def trainHerbivore(genomes, config):
                 #update fitness
                 genomes[i][1].fitness = herbivore.fitness
                 aliveCreatues += 1
-
+                
                 #if food was eaten, generate more
                 if (len(foodList)< lastFoodLen):
                     foodList = utility.trainReplenishFood(foodList)

@@ -83,8 +83,9 @@ class Herbivore(Creature.Creature):
         for predator in predators:
             distance = constants.WORLDSIZE
             distance = utility.getDistance(self.rect.centerx, self.rect.centery, predator.rect.centerx, predator.rect.centery)
-
+            
             if (distance < self.viewDistance):
+                self.predatorsInView += 1
                 A = (0, -1)
                 B = utility.getVectors(self.rect.centerx, self.rect.centery, predator.rect.centerx, predator.rect.centery)
         
@@ -116,6 +117,7 @@ class Herbivore(Creature.Creature):
                 elif (((angleToPredator < -175) or (angleToPredator > 175)) and (distance < self.nearestBottomPredator)):
                     self.nearestBottomPredator = distance
 
+                
                 if (distance < self.nearestPredatorDistance):
                     self.nearestPredatorDistance = distance
                     self.nearestPredatorX = predator.rect.centerx
@@ -206,7 +208,7 @@ class Herbivore(Creature.Creature):
         B = utility.getVectors(self.rect.centerx, self.rect.centery, self.nearestPredatorX, self.nearestPredatorY)
         angleToPredator = utility.angleBetween(A, B)
         angleToPredator = utility.adjustAngle(angleToPredator)
-
+        #print(self.nearestPredatorDistance)
         return [self.nearestFoodDistance,       #distance in pixels to the nearest piece of food
                 angleToFood,                    #angle in degrees to the nearest piece of food relative to the creature
                 foodForward,                    #amount of food in front of the creature
