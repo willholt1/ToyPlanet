@@ -39,6 +39,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
     f = open('dataOutput/PopulationData.csv', 'x')
     f.close()
     popDataCount = 0
+    framesCount = 0
 
     #label columns
     with open('dataOutput/HerbivoreData.csv', 'a', newline='') as file:
@@ -110,6 +111,7 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
                     running = False 
         
         #Update
+        framesCount += 1
         allSprites.empty()
         aliveCreatues = 0
         #update herbivores
@@ -199,17 +201,22 @@ def runPlanet(herbivoreGenome, predatorGenome, herbivoreConfig, predatorConfig):
         screen.fill((245, 222, 179))
         allSprites.draw(screen)
 
+        
         #display ammount of food
         foodCount = 'Food count: '+str(len(foodList))
         img = fontSmall.render(foodCount, True, (0,0,0))
-        screen.blit(img, (10, 930))
+        screen.blit(img, (10, 910))
         #display herbivore population
         hPop = 'H population: '+str(len(herbivores))
         img = fontSmall.render(hPop, True, (0,0,0))
-        screen.blit(img, (10, 950))
+        screen.blit(img, (10, 930))
         #display predator population
         pPop = 'P population: '+str(len(predators))
         img = fontSmall.render(pPop, True, (0,0,0))
+        screen.blit(img, (10, 950))
+        #display number of frames elapsed
+        frames = 'Frames: '+str(framesCount)
+        img = fontSmall.render(frames, True, (0,0,0))
         screen.blit(img, (10, 970))
 
         pygame.display.flip()

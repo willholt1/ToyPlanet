@@ -173,21 +173,21 @@ class Creature(pygame.sprite.Sprite):
 
         while (not mutated):
             selectMutation = random.randint(0,3)
-            mutationAmmount = random.randint(-1, 1)
+            mutationAmmount = random.randint(-3, 3)
 
             if (selectMutation == 0):
                 mutatedVal = round(self.viewDistance + (mutationAmmount * 10))
-                if (constants.VIEWDISTANCEMIN >= mutatedVal >= constants.VIEWDISTANCEMAX):
+                if (constants.VIEWDISTANCEMIN <= mutatedVal <= constants.VIEWDISTANCEMAX):
                     self.viewDistance = mutatedVal
                     mutated = True
             elif (selectMutation == 1):
                 mutatedVal = round(self.sleepTime + (mutationAmmount * 10))
-                if (constants.SLEEPTIMEMIN >= mutatedVal >= constants.SLEEPTIMEMAX):
+                if (constants.SLEEPTIMEMIN <= mutatedVal <= constants.SLEEPTIMEMAX):
                     self.sleepTime = mutatedVal
                     mutated = True
             elif (selectMutation == 2):
                 mutatedVal = round(self.metabolism + mutationAmmount)
-                if (constants.METABOLISMMIN >= mutatedVal >= constants.METABOLISMMAX):
+                if (constants.METABOLISMMIN <= mutatedVal <= constants.METABOLISMMAX):
                     self.metabolism = mutatedVal
                     mutated = True
             elif (selectMutation == 3):

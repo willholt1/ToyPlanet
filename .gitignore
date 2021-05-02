@@ -1,0 +1,13 @@
+__pycache__/constants.cpython-39.pyc
+__pycache__/Creature.cpython-39.pyc
+__pycache__/Food.cpython-39.pyc
+__pycache__/Herbivore.cpython-39.pyc
+__pycache__/MenuButton.cpython-39.pyc
+__pycache__/Predator.cpython-39.pyc
+__pycache__/runPlanet.cpython-39.pyc
+__pycache__/trainHerbivore.cpython-39.pyc
+__pycache__/trainPredator.cpython-39.pyc
+__pycache__/utility.cpython-39.pyc
+dataOutput/HerbivoreData.csv
+dataOutput/PopulationData.csv
+dataOutput/PredatorData.csv
